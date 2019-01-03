@@ -1,0 +1,19 @@
+{
+  "name": "bossid-wasteiq-compare",
+  "version": "1.0.0",
+  "description": "Compare BossID to WasteIQ on data and calculations",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tvedtorama/bossid-wasteiq-compare.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tvedtorama/bossid-wasteiq-compare/issues"
+  },
+  "homepage": "https://github.com/tvedtorama/bossid-wasteiq-compare#readme"
+}
