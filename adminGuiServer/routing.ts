@@ -1,8 +1,7 @@
 import * as express from 'express'
 import { setupGraphQLEndpoint } from '../utils/expressHandlers/graphQLEndpoint';
 import { createCommonDataAccess, createTheStore } from '../utils/loaders';
-import { GraphQLSchema, GraphQLObjectType, GraphQLString } from 'graphql';
-import { IRootValueRoot } from './schema/IRootValue';
+import { createSchema } from './schema/createSchema';
 
 export const router = express.Router()
 
@@ -35,32 +34,6 @@ const setCookie = (newIdentity: string, res: express.Response) => {
 router.use(/\/(someDefaultRoute|someOtherRoute)?$/, async (req, res: express.Response) => {
 	const jwt = null // Very confusing, as this is currently set in the GUI after the cookie.  await signJwt("CTF", identity)
 	renderMain(req, res, {jwt})
-})
-
-const createSchema = () => new GraphQLSchema({
-	query: new GraphQLObjectType({
-		name: 'Query',
-		fields: () => ({
-			store: {
-				type: new GraphQLObjectType({
-					name: 'Store',
-					fields: () => ({
-						user: {
-							type: new GraphQLObjectType({
-								name: "user",
-								fields: () => ({
-									name: {
-										type: GraphQLString,
-									}
-								})
-							})
-						},
-					})
-				}),
-				resolve: (_1, _2, _3, {rootValue: {dataAccess}}: IRootValueRoot) => dataAccess.store()
-			}
-		})
-	})
 })
 
 const apiUrlPath = "/comparegraphql"
