@@ -14,25 +14,21 @@ export const createWasteIQDriver = () =>
 			const url = process.env.GRAPHQL_URL || "http://127.0.0.1:3000/publicgraphql"
 
 			const graphQlQuery = `query($startTimeIso: DateTime, $endTimeIso: DateTime) {
-				store {
-				  accessPoint(id: "CONTAINER_ROOT") {
-					children {
-					  events(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso) {
-						timestamp
-						type
-						fraction: property(key: "fraction")
-						point {
-						  point {
-							id
-							  tag: externalKey(key: "tag")
-						  }
+					store {
+						accessPoint(id: "CONTAINER_ROOT") {
+							children {
+								id
+								tag: externalKey(key: "tag")
+								events(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso) {
+									timestamp
+									type
+									fraction: property(key: "fraction")
+								}
+							}
 						}
-					  }
 					}
-				  }
-				}
-			  }
-			  `
+				}`
+
 			const variables = args
 
 			const callIt = async () => {
