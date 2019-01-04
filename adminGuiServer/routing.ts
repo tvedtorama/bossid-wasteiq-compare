@@ -41,7 +41,7 @@ const schema = createSchema()
 
 export const dataAccess = () => <ApiSupportSchema.ISchemaArgs>
 	createCommonDataAccess(
-		dbInfo => createTheStore(dbInfo),
+		args => createTheStore(args),
 		dbInfoPromise => ({}),
 	)
 

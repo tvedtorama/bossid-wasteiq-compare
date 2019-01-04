@@ -15,16 +15,17 @@ export interface IJwtUser {
 } */
 
 
-export const createTheStore = async (dbInfo) => ({
+export const createTheStore = async (args: ApiSupportSchema.IStoreArgs) => (<ApiSupportSchema.ICoreStore>{
 	name: "This is my name",
 	// Note: User should be provided by the jwt, ATW this is not conveyed in here.
 	user: Promise.resolve({name: "The User's name"}),
+	getArgs: () => args
 })
 
-export const createCommonDataAccess = function<U extends object>(getStore: (mainDbInfo: IDBInfo) => any, getAdditionals: (mainDbInfoPromise: Promise<IDBInfo>) => U) {
+export const createCommonDataAccess = function<U extends object>(getStore: (args) => any, getAdditionals: (mainDbInfoPromise: Promise<IDBInfo>) => U) {
 	return [initDbInfoAndSetupDataLoaders("MAIN")].map(dbInfo =>
 		<ApiSupportSchema.ICommonSchemaArgs<ApiSupportSchema.ICommonStore> & U>({
-			store: () => dbInfo.then(dbInfo => getStore(dbInfo)),
+			store: (args) => dbInfo.then(dbInfo => getStore(args)),
 			...<object>getAdditionals(dbInfo)
 		})
 	)[0]

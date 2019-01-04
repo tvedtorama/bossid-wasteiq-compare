@@ -5,7 +5,13 @@ namespace ApiSupportSchema {
 		user: Promise<any>
 	}
 
+	export interface IStoreArgs {
+		rootId: string
+		startTimeIso: string
+		endTimeIso: string
+	}
+
 	export interface ICommonSchemaArgs<TStore extends ICommonStore> {
-		store: () => Promise<TStore>
+		store: (args: IStoreArgs) => Promise<TStore>
 	}
 }
