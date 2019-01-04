@@ -29,7 +29,7 @@ export const createSchema = () => new GraphQLSchema({
 						},
 						wasteIQ: {
 							type: terminalTestSchema,
-							resolve: (store: ApiSupportSchema.ICoreStore) => getWasteIQDriver()(store.getArgs()),
+							resolve: (store: ApiSupportSchema.ICoreStore, _1, _2, {rootValue}) => getWasteIQDriver()(store.getArgs(), rootValue),
 						},
 						bossID: {
 							type: terminalTestSchema,

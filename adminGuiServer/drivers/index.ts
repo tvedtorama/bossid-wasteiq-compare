@@ -1,4 +1,5 @@
 import { createBossIdDriver } from "./bossid";
+import { createWasteIQDriver } from "./wasteiq";
 
 const dummyImpl = (args: ApiSupportSchema.IStoreArgs) => (<SourceContracts.ITerminalTest>{
 	containerEvents: async () => [
@@ -20,4 +21,4 @@ const sqlClient = (() => {
 })();
 
 export const getBossIdDriver = () => sqlClient ? createBossIdDriver(sqlClient) : dummyImpl
-export const getWasteIQDriver = () => dummyImpl
+export const getWasteIQDriver = () => createWasteIQDriver()
