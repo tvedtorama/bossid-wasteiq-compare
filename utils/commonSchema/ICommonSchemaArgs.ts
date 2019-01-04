@@ -3,6 +3,7 @@ namespace ApiSupportSchema {
 	export interface ICommonStore {
 		name: string
 		user: Promise<any>
+		getArgs(): ApiSupportSchema.IStoreArgs
 	}
 
 	export interface IStoreArgs {

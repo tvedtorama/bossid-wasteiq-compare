@@ -3,7 +3,6 @@
 import * as _ from 'lodash'
 import { initDbInfoAndSetupDataLoaders, IDBInfo } from './initDbInfo';
 
-
 export interface IJwtUser {
 	// Sub for "Subject" - this is assumed to contain the unqiue identifier of the account.
 	sub: string
@@ -15,7 +14,7 @@ export interface IJwtUser {
 } */
 
 
-export const createTheStore = async (args: ApiSupportSchema.IStoreArgs) => (<ApiSupportSchema.ICoreStore>{
+export const createTheStore = async (args: ApiSupportSchema.IStoreArgs) => (<ApiSupportSchema.ICommonStore>{
 	name: "This is my name",
 	// Note: User should be provided by the jwt, ATW this is not conveyed in here.
 	user: Promise.resolve({name: "The User's name"}),
