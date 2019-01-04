@@ -2,17 +2,10 @@ import { GraphQLSchema, GraphQLObjectType, GraphQLString } from "graphql";
 import { IRootValueRoot } from "./IRootValue";
 import { terminalTestSchema } from "./terminalTestSchema";
 import { TypedArgConfigMap } from "../../utils/commonSchema/TypedFieldConfigMap";
+import { getWasteIQDriver, getBossIdDriver } from "../drivers";
 
-const dummyImpl = (args: ApiSupportSchema.IStoreArgs) => (<SourceContracts.ITerminalTest>{
-	containerEvents: async () => [
-			{
-				fraction: "10",
-				timestampIso: new Date(Date.parse(args.startTimeIso) + 3600 * 1000).toISOString(),
-				type: "EMPTY",
-				pointReference: "abc123",
-			}
-		]
-})
+const wasteIQDriver = getWasteIQDriver()
+const bossIdDriver = getBossIdDriver()
 
 
 export const createSchema = () => new GraphQLSchema({
@@ -40,11 +33,11 @@ export const createSchema = () => new GraphQLSchema({
 						},
 						wasteIQ: {
 							type: terminalTestSchema,
-							resolve: (store: ApiSupportSchema.ICoreStore) => dummyImpl(store.getArgs()),
+							resolve: (store: ApiSupportSchema.ICoreStore) => wasteIQDriver(store.getArgs()),
 						},
 						bossID: {
 							type: terminalTestSchema,
-							resolve: (store: ApiSupportSchema.ICoreStore) => dummyImpl(store.getArgs()),
+							resolve: (store: ApiSupportSchema.ICoreStore) => bossIdDriver(store.getArgs()),
 						}
 					})
 				}),

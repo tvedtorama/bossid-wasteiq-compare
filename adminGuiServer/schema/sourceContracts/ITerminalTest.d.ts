@@ -1,5 +1,5 @@
 namespace SourceContracts {
 	interface ITerminalTest {
-		containerEvents: (x) => Promise<SourceContracts.IEventBase[]>
+		containerEvents: () => Promise<SourceContracts.IEventBase[]>
 	}
 }
