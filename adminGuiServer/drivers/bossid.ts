@@ -28,7 +28,7 @@ export const createBossIdDriver = (sql: SqlClient) =>
 					})
 				})
 			return rowsRaw.map(x => (<SourceContracts.IEventBase>{
-				fraction: x.FraksjonsID,
+				fraction: x.FraksjonID,
 				pointReference: x.Merkelapp,
 				timestampIso: (<Date>x.HendelseDato).toISOString(),
 				type: "OUT",

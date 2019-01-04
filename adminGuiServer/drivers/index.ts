@@ -13,11 +13,11 @@ const dummyImpl = (args: ApiSupportSchema.IStoreArgs) => (<SourceContracts.ITerm
 
 const sqlClient = (() => {
 	try {
-		require("msnodesqlv8")
+		return require("msnodesqlv8")
 	} catch {
 		return null
 	}
-})()
+})();
 
 export const getBossIdDriver = () => sqlClient ? createBossIdDriver(sqlClient) : dummyImpl
 export const getWasteIQDriver = () => dummyImpl

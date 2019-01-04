@@ -4,10 +4,6 @@ import { terminalTestSchema } from "./terminalTestSchema";
 import { TypedArgConfigMap } from "../../utils/commonSchema/TypedFieldConfigMap";
 import { getWasteIQDriver, getBossIdDriver } from "../drivers";
 
-const wasteIQDriver = getWasteIQDriver()
-const bossIdDriver = getBossIdDriver()
-
-
 export const createSchema = () => new GraphQLSchema({
 	query: new GraphQLObjectType({
 		name: 'Query',
@@ -33,11 +29,11 @@ export const createSchema = () => new GraphQLSchema({
 						},
 						wasteIQ: {
 							type: terminalTestSchema,
-							resolve: (store: ApiSupportSchema.ICoreStore) => wasteIQDriver(store.getArgs()),
+							resolve: (store: ApiSupportSchema.ICoreStore) => getWasteIQDriver()(store.getArgs()),
 						},
 						bossID: {
 							type: terminalTestSchema,
-							resolve: (store: ApiSupportSchema.ICoreStore) => bossIdDriver(store.getArgs()),
+							resolve: (store: ApiSupportSchema.ICoreStore) => getBossIdDriver()(store.getArgs()),
 						}
 					})
 				}),
