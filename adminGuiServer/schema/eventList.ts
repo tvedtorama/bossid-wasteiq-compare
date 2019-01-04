@@ -12,6 +12,9 @@ export const eventList = new GraphQLObjectType({
 		},
 		fraction: {
 			type: GraphQLString,
+		},
+		pointReference: {
+			type: GraphQLString,
 		}
 	})
 })
