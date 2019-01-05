@@ -13,7 +13,8 @@ const {connectionString} = require.main.require("./connectionString")
 const query = (startTimeIso: string, endTimeIso: string) => `select Merkelapp, HendelseDato, TommeReferanse, FT.FraksjonID
 FROM [dbo].[TommeHendelseContainerBossID] THC
 INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON THC.IDFraksjon = FT.IDFraksjon
-WHERE (HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}') `;
+WHERE (HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
+ORDER BY HendelseDato`;
 
 export const createBossIdDriver = (sql: SqlClient) =>
 	(args: ApiSupportSchema.IStoreArgs) => <SourceContracts.ITerminalTest>{
