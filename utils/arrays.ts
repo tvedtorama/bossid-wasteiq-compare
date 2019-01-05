@@ -24,3 +24,6 @@ export const intersection = <T>(arrays: T[][]): T[] =>
 	arrays.reduce((a, b) =>
 		a.filter(value =>
 			b.indexOf(value) > -1))
+
+export const sortByCompare = (key: string | number | symbol) =>
+	(a, b) => (a[key] > b[key]) ? 1 : ((b[key] > a[key]) ? -1 : 0)
