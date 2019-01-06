@@ -34,8 +34,8 @@ export const testRunner = function*() {
 
 		const args = {
 			// Move to action
-			startTimeIso: "2018-11-01T07:51:15.000Z",
-			endTimeIso: "2018-12-22T07:51:15.000Z"
+			startTimeIso: "2018-12-16T07:51:15.000Z",
+			endTimeIso: "2019-01-06T07:51:15.000Z"
 		}
 
 		const result: Tests.ITestResultCore = yield call(containerEvents, api, args)

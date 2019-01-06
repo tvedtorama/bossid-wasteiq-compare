@@ -3,8 +3,8 @@ import { Context } from "../../utils/clientApi";
 
 
 export const containerEvents = async (api: Api, args: any) => {
-	const result = await api.runQuery(`query($startTimeIso: String) {
-		store(rootId: "S1", startTimeIso: $startTimeIso, endTimeIso: "2018-12-21T07:58:15.000Z") {
+	const result = await api.runQuery(`query($rootId: String, $startTimeIso: String, $endTimeIso: String) {
+		store(rootId: $rootId, startTimeIso: $startTimeIso, endTimeIso: $endTimeIso) {
 		  bossID {
 			containerEvents {
 			  timestampIso
