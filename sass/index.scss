@@ -5,3 +5,13 @@
 	border-radius: 0.5em;
 	color: orange;
 }
+
+.test-result {
+	header {
+		display: flex;
+		flex-direction: row;
+		> * {
+			margin-right: 1em;
+		}
+	}
+}

@@ -1,6 +1,5 @@
 import * as React from 'react'
 
-
 export type ActionFromState<T> = Partial<T> & {
 	type: string
 }
@@ -63,4 +62,5 @@ export interface IState {
 	modal: IModalState
 	notifications?: INotificationState[]
 	langCust?: ILangCustState
+	testResults?: Tests.ITestResult[]
 }

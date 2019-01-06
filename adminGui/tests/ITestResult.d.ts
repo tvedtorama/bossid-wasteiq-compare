@@ -9,5 +9,6 @@ namespace Tests {
 	interface ITestResult extends ITestResultCore {
 		testName: string
 		timestamp: number
+		diffResult: string
 	}
 }

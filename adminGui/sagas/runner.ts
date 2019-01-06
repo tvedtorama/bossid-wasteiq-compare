@@ -1,4 +1,4 @@
-import { take, select, call } from "redux-saga/effects";
+import { take, select, call, put } from "redux-saga/effects";
 import { Api } from "../api";
 import { IState } from "../IState";
 import { containerEvents } from "../tests/containerEvents";
@@ -21,6 +21,11 @@ export const runTest = (testCode: IRunTest["testCode"]): IRunTest => ({
 
 export const RUN_TEST: IRunTest["type"] = "RUN_TEST"
 
+export interface IStoreTestResult {
+	type: "STORE_TEST_RESULT"
+	payload: Tests.ITestResult
+}
+
 const pretty = (a: any) => JSON.stringify(a, null, 2)
 
 export const testRunner = function*() {
@@ -30,7 +35,7 @@ export const testRunner = function*() {
 	// Map of actions - each linking to a test runner.  Run the test, put the result in state, including diff result - render the result.  Open dialog with diff.
 
 	while (true) {
-		yield take(RUN_TEST)
+		const testSpec: IRunTest = yield take(RUN_TEST)
 
 		const args = {
 			// Move to action
@@ -41,5 +46,7 @@ export const testRunner = function*() {
 		const result: Tests.ITestResultCore = yield call(containerEvents, api, args)
 		const diffResult = jsdiff.createTwoFilesPatch("BossID", "WasteIQ", pretty(result.bossID), pretty(result.wasteIQ))
 		console.log("Diff Result", diffResult)
+
+		yield put(<IStoreTestResult>{type: "STORE_TEST_RESULT", payload: {...result, diffResult, testName: testSpec.testCode, timestamp: +new Date()}})
 	}
 }
