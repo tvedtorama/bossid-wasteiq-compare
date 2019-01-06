@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { TestList } from './TestList';
 
 // Note: Create a styles root React node that loads the styles and holds back other rendering until ready.  Styles and data will be loaded at parallel.
 const sassModule = import(/* webpackChunkName: "styles" */ '../../sass/index.scss')
@@ -13,6 +14,6 @@ export class WebMain extends React.Component<{store: any}, {counter: number}> {
 	}
 
 	render() {
-		return <div className="all-of-the-world"><span>Hello world!</span></div>
+		return <div className="all-of-the-world"><TestList /></div>
 	}
 }

@@ -52,7 +52,7 @@ export class ClientApiBase {
 	protected getUrl = (context: Context = Context.USER_ONLY): string =>
 		ClientApiBase._rootUrl + "comparegraphql"
 
-	protected runQuery = <T = any>(query, context = Context.USER_ONLY, variables = {}) =>
+	public runQuery = <T = any>(query, context = Context.USER_ONLY, variables = {}) =>
 		axios.post(this.getUrl(context), {
 			query,
 			token: this._token,
