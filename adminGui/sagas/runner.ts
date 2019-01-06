@@ -3,6 +3,8 @@ import { Api } from "../api";
 import { IState } from "../IState";
 import { containerEvents } from "../tests/containerEvents";
 
+const jsdiff = require("diff")
+
 const tests = {
 	"testx": containerEvents
 }
@@ -19,6 +21,8 @@ export const runTest = (testCode: IRunTest["testCode"]): IRunTest => ({
 
 export const RUN_TEST: IRunTest["type"] = "RUN_TEST"
 
+const pretty = (a: any) => JSON.stringify(a, null, 2)
+
 export const testRunner = function*() {
 	const state = <IState>(yield select())
 	const api = new Api(state.initData.token)
@@ -29,10 +33,13 @@ export const testRunner = function*() {
 		yield take(RUN_TEST)
 
 		const args = {
+			// Move to action
 			startTimeIso: "2018-11-01T07:51:15.000Z",
 			endTimeIso: "2018-12-22T07:51:15.000Z"
 		}
 
-		yield call(containerEvents, api, args)
+		const result: Tests.ITestResultCore = yield call(containerEvents, api, args)
+		const diffResult = jsdiff.createTwoFilesPatch("BossID", "WasteIQ", pretty(result.bossID), pretty(result.wasteIQ))
+		console.log("Diff Result", diffResult)
 	}
 }
