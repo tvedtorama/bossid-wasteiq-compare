@@ -60,5 +60,8 @@ export const createWasteIQDriver = () =>
 				},
 				timestamp: e.timestamp,
 			})))).concat().sort(sortByCompare("timestamp")).map(x => x.block)
+		},
+		intervalTree: async () => {
+			return []
 		}
 	}

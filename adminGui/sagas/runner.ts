@@ -2,11 +2,13 @@ import { take, select, call, put } from "redux-saga/effects";
 import { Api } from "../api";
 import { IState } from "../IState";
 import { containerEvents } from "../tests/containerEvents";
+import { intervalTree } from "../tests/intervalTree";
 
 const jsdiff = require("diff")
 
 const tests = {
-	"testx": containerEvents
+	"containerEvents": containerEvents,
+	"intervalTree": intervalTree,
 }
 
 interface IRunTest {

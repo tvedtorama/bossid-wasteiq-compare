@@ -22,7 +22,8 @@ export class TestListRaw extends React.Component<IMangledProps, {toggles: {[inde
 	}
 	render() {
 		return <div className="test-list">
-			<a onClick={() => this.props.runTest("testx")}><span>Hei</span></a>
+			<a onClick={() => this.props.runTest("containerEvents")}><span>Container Events</span></a>
+			<a onClick={() => this.props.runTest("intervalTree")}><span>Interval Tree</span></a>
 			<ul>
 				{this.props.results.map((r, i) =>
 					<li key={i}>
