@@ -17,7 +17,8 @@ INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON THC.IDFraksjon = FT.IDFraksjon
 WHERE (HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
 ORDER BY HendelseDato`;
 
-const intervalTreeQuery = (startTimeIso: string, endTimeIso: string) => `SELECT TH_C.HendelseDato ContainerTimestamp, TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
+const intervalTreeQuery = (startTimeIso: string, endTimeIso: string) => `SELECT TH_C.HendelseDato ContainerTimestamp, FT.FraksjonID,
+	TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
 	TE_E.IDPunktBarn ValveBossIdId,
 	KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale
 FROM [BossID].[dbo].[KundeHendelserContainer] KHC
@@ -25,6 +26,7 @@ INNER JOIN [BossID].[dbo].[TommeHendelser] TH_C on TH_C.IDTommeHendelse = KHC.ID
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_E ON TH_E.IDTommeHendelse = KHC.IDTommeHendelseEnhet
 INNER JOIN [BossID].[dbo].[TommeEnhet] TE_C ON TE_C.IDTommeEnhet = TH_C.IDTommeEnhet
 INNER JOIN [BossID].[dbo].[TommeEnhet] TE_E ON TE_E.IDTommeEnhet = TH_E.IDTommeEnhet
+INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON TH_C.IDFraksjon = FT.IDFraksjon
 LEFT OUTER JOIN [BossID].[dbo].[KundeHendelserEnhet] KHE ON KHE.IDTommeHendelse = KHC.IDTommeHendelseEnhet
 LEFT OUTER JOIN [BossID].[dbo].[KundeHendelser] KH ON KH.IDKundeHendelse = KHE.IDKundeHendelse
 LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
@@ -59,6 +61,7 @@ export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(s
 			return rowsRaw.map(x => (<SourceContracts.IFlatIntervalTree>{
 				containerTimestampIso: (<Date>x.ContainerTimestamp).toISOString(),
 				containerTag: x.Tag,
+				fractionCode: x.FraksjonID,
 				valveBossIdId: 'C' + x.ValveBossIdId,
 				valveTimestampIso: (<Date>x.ValveTimestamp).toISOString(),
 				customerEventTimestampIso: x.CustomerTimestamp && (<Date>x.CustomerTimestamp).toISOString(),
