@@ -16,6 +16,7 @@ export const intervalTree = async (api: Api, args: any) => {
 				customerEventIdentityIdentifier
 				customerEventAgreementGuid
 				customerEventValue
+				fractionCode
 			}
 		  }
 		  wasteIQ {
@@ -29,6 +30,7 @@ export const intervalTree = async (api: Api, args: any) => {
 				customerEventIdentityIdentifier
 				customerEventAgreementGuid
 				customerEventValue
+				fractionCode
 			}
 		  }
 		}
