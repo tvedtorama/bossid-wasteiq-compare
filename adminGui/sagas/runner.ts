@@ -46,6 +46,10 @@ export const testRunner = function*() {
 		}
 
 		const result: Tests.ITestResultCore = yield call(containerEvents, api, args)
+		// Compare key metrics first.
+		// Run the test for each terminal, as long as the test supports it - and the user has not cancelled it
+		//   Pass the list to the test - and allow the test to determine what to run.
+		//     Ie, multiple output
 		const diffResult = jsdiff.createTwoFilesPatch("BossID", "WasteIQ", pretty(result.bossID), pretty(result.wasteIQ))
 		console.log("Diff Result", diffResult)
 
