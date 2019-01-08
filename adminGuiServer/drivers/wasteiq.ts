@@ -4,6 +4,8 @@ import { signJwt } from "../../utils/security/jwt";
 import { IRootValue } from "../schema/IRootValue";
 import { flatten, sortByCompare } from '../../utils/arrays';
 import { parseTree } from './wasteIQHelpers/parseTree';
+import { flatMap, orderBy, thenBy } from '@reactivex/ix-es5-cjs/iterable/pipe/index';
+import { Iterable } from '@reactivex/ix-es5-cjs';
 
 const url = process.env.GRAPHQL_URL || "http://127.0.0.1:3000/publicgraphql"
 
@@ -118,10 +120,15 @@ export const createWasteIQDriver = () =>
 			}`
 
 			const fractions = ["9999", "1299"]
-			const fraction = fractions[0]
 
-			const result = await callIt(intervalTreeEnvac, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue)
-			const parsed = parseTree(result.store.terminal.intervalEventTree.list, fraction)
+
+			const results = await Promise.all(fractions.map(fraction => callIt(intervalTreeEnvac, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+					then(result => parseTree(result.store.terminal.intervalEventTree.list, fraction))))
+			const parsed = Iterable.from(results).pipe(
+				flatMap(x => x),
+				orderBy(x => x.valveTimestampIso),
+				thenBy(x => x.customerEventTimestampIso),
+			)
 
 			return [...parsed]
 		}
