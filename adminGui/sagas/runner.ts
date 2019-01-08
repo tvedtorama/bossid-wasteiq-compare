@@ -8,7 +8,8 @@ const jsdiff = require("diff")
 
 const tests = {
 	"containerEvents": containerEvents,
-	"intervalTree": intervalTree,
+	"intervalTree S1": (api, args) => intervalTree(api, {...args, rootId: "S1"}),
+	"intervalTree S2": (api, args) => intervalTree(api, {...args, rootId: "S2"}),
 }
 
 interface IRunTest {
@@ -28,7 +29,12 @@ export interface IStoreTestResult {
 	payload: Tests.ITestResult
 }
 
+const MAX_LENGTH_COMPARE_STRING = 20000 // 500 * 40
+
 const pretty = (a: any) => JSON.stringify(a, null, 2)
+const prettyAndCut = (a: any, vp = pretty(a)) => vp.length <= MAX_LENGTH_COMPARE_STRING ? vp :
+`${vp.substr(0, MAX_LENGTH_COMPARE_STRING)}
+Clipped length: ${vp.length - MAX_LENGTH_COMPARE_STRING} characters`
 
 export const testRunner = function*() {
 	const state = <IState>(yield select())
@@ -41,16 +47,17 @@ export const testRunner = function*() {
 
 		const args = {
 			// Move to action
-			startTimeIso: "2018-12-16T07:51:15.000Z",
-			endTimeIso: "2019-01-06T07:51:15.000Z"
+			startTimeIso: "2018-11-12T00:00:00.000Z",
+			endTimeIso: "2019-01-06T00:00:00.000Z",
+			rootId: "S2",
 		}
 
-		const result: Tests.ITestResultCore = yield call(containerEvents, api, args)
+		const result: Tests.ITestResultCore = yield call(tests[testSpec.testCode], api, args)
 		// Compare key metrics first.
 		// Run the test for each terminal, as long as the test supports it - and the user has not cancelled it
 		//   Pass the list to the test - and allow the test to determine what to run.
 		//     Ie, multiple output
-		const diffResult = jsdiff.createTwoFilesPatch("BossID", "WasteIQ", pretty(result.bossID), pretty(result.wasteIQ))
+		const diffResult = jsdiff.createTwoFilesPatch("BossID", "WasteIQ", prettyAndCut(result.bossID), prettyAndCut(result.wasteIQ))
 		console.log("Diff Result", diffResult)
 
 		yield put(<IStoreTestResult>{type: "STORE_TEST_RESULT", payload: {...result, diffResult, testName: testSpec.testCode, timestamp: +new Date()}})
