@@ -38,7 +38,7 @@ export interface IInterval extends IHavePoint {
 export const parseTree = (list: IInterval[], fractionCode: string): Iterable<SourceContracts.IFlatIntervalTree> =>
 	Iterable.from(list).pipe(
 		flatMap(contInterval => Iterable.from(contInterval.intervalEventTree.list).pipe(
-			flatMap(valveInterval => Iterable.from(valveInterval.intervalEventTree.events || [<IEvent>{customer: {customer: {aggreementGuid: null}}}]).pipe(
+			flatMap(valveInterval => Iterable.from(valveInterval.intervalEventTree.events.length ? valveInterval.intervalEventTree.events : [<IEvent>{customer: {customer: {aggreementGuid: null}}}]).pipe(
 				map(event => <SourceContracts.IFlatIntervalTree>{
 					containerTag: contInterval.endEvent.parent.point.point.tag,
 					containerTimestampIso: new Date(contInterval.endTime).toISOString(), // Same as endEvent.timestamp
