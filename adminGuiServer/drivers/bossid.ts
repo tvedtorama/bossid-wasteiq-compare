@@ -1,9 +1,4 @@
 import { EventEmitter } from "events";
-import { flatIntervalTree } from "../schema/flatIntervalTree";
-
-/*import { SqlClient } from "msnodesqlv8";
- 
-const sql: SqlClient = require("msnodesqlv8"); */
 
 interface SqlClient {
 	query: (connStr, query: string, cb: (err: any, rows: any[], more: boolean) => void) => EventEmitter
@@ -45,6 +40,8 @@ const createRowsQuery = (sql: SqlClient) =>
 	})
 })
 
+const convertAndFormatTimestamp = (timestamp: Date) => timestamp && new Date(+timestamp - 3600000).toISOString()
+
 export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(sql)) =>
 	(args: ApiSupportSchema.IStoreArgs) => <SourceContracts.ITerminalTest>{
 		containerEvents: async () => {
@@ -52,19 +49,19 @@ export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(s
 			return rowsRaw.map(x => (<SourceContracts.IEventBase>{
 				fraction: x.FraksjonID,
 				pointReference: x.Merkelapp,
-				timestampIso: (<Date>x.HendelseDato).toISOString(),
+				timestampIso: convertAndFormatTimestamp(x.HendelseDato),
 				type: "OUT",
 			}))
 		},
 		intervalTree: async () => {
 			const rowsRaw: any[] = await rowsQuery(intervalTreeQuery(args.startTimeIso, args.endTimeIso))
 			return rowsRaw.map(x => (<SourceContracts.IFlatIntervalTree>{
-				containerTimestampIso: (<Date>x.ContainerTimestamp).toISOString(),
+				containerTimestampIso: convertAndFormatTimestamp(x.ContainerTimestamp),
 				containerTag: x.Tag,
 				fractionCode: x.FraksjonID,
 				valveBossIdId: 'C' + x.ValveBossIdId,
-				valveTimestampIso: (<Date>x.ValveTimestamp).toISOString(),
-				customerEventTimestampIso: x.CustomerTimestamp && (<Date>x.CustomerTimestamp).toISOString(),
+				valveTimestampIso: convertAndFormatTimestamp(x.ValveTimestamp),
+				customerEventTimestampIso: convertAndFormatTimestamp(x.CustomerTimestamp),
 				customerEventValue: x.Verdi,
 				customerEventAgreementGuid: x.GUIDAvtale,
 				customerEventIdentityIdentifier: x.Rfid,
