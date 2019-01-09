@@ -47,8 +47,8 @@ export const testRunner = function*() {
 
 		const args = {
 			// Move to action
-			startTimeIso: "2018-11-12T00:00:00.000Z",
-			endTimeIso: "2019-01-06T00:00:00.000Z",
+			startTimeIso: "2018-12-31T00:00:00.000Z",
+			endTimeIso: "2019-01-02T00:00:00.000Z",
 			rootId: "S2",
 		}
 

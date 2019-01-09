@@ -26,7 +26,7 @@ LEFT OUTER JOIN [BossID].[dbo].[KundeHendelserEnhet] KHE ON KHE.IDTommeHendelse 
 LEFT OUTER JOIN [BossID].[dbo].[KundeHendelser] KH ON KH.IDKundeHendelse = KHE.IDKundeHendelse
 LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
 WHERE (TH_C.HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND TH_C.HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
-ORDER BY TH_C.HendelseDato`;
+ORDER BY TH_C.HendelseDato, CustomerTimestamp`;
 
 
 const createRowsQuery = (sql: SqlClient) =>
