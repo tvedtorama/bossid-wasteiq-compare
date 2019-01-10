@@ -26,7 +26,7 @@ LEFT OUTER JOIN [BossID].[dbo].[KundeHendelserEnhet] KHE ON KHE.IDTommeHendelse 
 LEFT OUTER JOIN [BossID].[dbo].[KundeHendelser] KH ON KH.IDKundeHendelse = KHE.IDKundeHendelse
 LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
 WHERE (TH_C.HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND TH_C.HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
-ORDER BY TH_C.HendelseDato, CustomerTimestamp`;
+ORDER BY ContainerTimestamp ASC, ValveTimestamp ASC, CustomerTimestamp ASC`;
 
 
 const createRowsQuery = (sql: SqlClient) =>
@@ -40,7 +40,8 @@ const createRowsQuery = (sql: SqlClient) =>
 	})
 })
 
-const convertAndFormatTimestamp = (timestamp: Date) => timestamp && new Date(+timestamp - 3600000).toISOString()
+const convertAndFormatTimestamp = (timestamp: Date) =>
+	timestamp && new Date(Math.floor((+timestamp - 3600000) / 1000) * 1000).toISOString()
 
 export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(sql)) =>
 	(args: ApiSupportSchema.IStoreArgs) => <SourceContracts.ITerminalTest>{
