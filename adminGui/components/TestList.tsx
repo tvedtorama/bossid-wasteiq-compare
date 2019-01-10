@@ -3,6 +3,7 @@ import { runTest } from '../sagas/runner';
 import { connect } from 'react-redux';
 import { IState } from '../IState';
 import { ReactGhLikeDiff } from 'react-gh-like-diff';
+import {Button, Paper} from '@material-ui/core';
 import 'react-gh-like-diff/lib/diff2html.min.css';
 
 const methods = {
@@ -22,25 +23,29 @@ export class TestListRaw extends React.Component<IMangledProps, {toggles: {[inde
 	}
 	render() {
 		return <div className="test-list">
-			<a onClick={() => this.props.runTest("containerEvents")}><span>Container Events</span></a>
-			<a onClick={() => this.props.runTest("intervalTree S1")}><span>Interval Tree (T1)</span></a>
-			<a onClick={() => this.props.runTest("intervalTree S2")}><span>Interval Tree (T2)</span></a>
-			<ul>
-				{this.props.results.map((r, i) =>
-					<li key={i}>
-						<div className={"test-result"}>
-							<header>
-								<span className={"timestamp"}>{new Date(r.timestamp).toISOString()}</span>
-								<span className={"test-name"}>{r.testName}</span>
-								<a onClick={() => this.toggle(r.timestamp)}>Toggle</a>
-							</header>
-							{
-								this.state.toggles[r.timestamp] &&
-									<ReactGhLikeDiff diffString={r.diffResult} />
-							}
-						</div>
-					</li>)}
-			</ul>
+			<Paper className="test-buttons">
+				<Button onClick={() => this.props.runTest("containerEvents")} variant="contained" color="primary"><span>Container Events</span></Button>
+				<Button onClick={() => this.props.runTest("intervalTree S1")} variant="contained" color="primary"><span>Interval Tree (T1)</span></Button>
+				<Button onClick={() => this.props.runTest("intervalTree S2")} variant="contained" color="primary"><span>Interval Tree (T2)</span></Button>
+			</Paper>
+			<Paper className="test-results">
+				<ul>
+					{this.props.results.map((r, i) =>
+						<li key={i}>
+							<div className={"test-result"}>
+								<header>
+									<span className={"timestamp"}>{new Date(r.timestamp).toISOString()}</span>
+									<span className={"test-name"}>{r.testName}</span>
+									<a onClick={() => this.toggle(r.timestamp)}>Toggle</a>
+								</header>
+								{
+									this.state.toggles[r.timestamp] &&
+										<ReactGhLikeDiff diffString={r.diffResult} />
+								}
+							</div>
+						</li>)}
+				</ul>
+			</Paper>
 		</div>
 	}
 }

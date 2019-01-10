@@ -6,12 +6,31 @@
 	color: orange;
 }
 
-.test-result {
-	header {
+.test-list {
+	.test-buttons, .test-results {
+		padding: 1em;
+		margin-bottom: 1em;
+	}
+
+	.test-buttons {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		> * {
-			margin-right: 1em;
+			margin: 0.5em;
 		}
 	}
+
+	.test-results {
+		min-height: 1em;
+		.test-result {
+			header {
+				display: flex;
+				flex-direction: row;
+				> * {
+					margin-right: 1em;
+				}
+			}
+		}	
+	}
 }
+

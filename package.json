@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/tvedtorama/bossid-wasteiq-compare#readme",
   "dependencies": {
+    "@material-ui/core": "^3.8.3",
     "@reactivex/ix-es5-cjs": "^2.3.5",
     "argparse": "^1.0.10",
     "axios": "^0.18.0",
