@@ -3,9 +3,11 @@ import { runTest, ITestArgs, ITestCodes } from '../sagas/runner';
 import { connect } from 'react-redux';
 import { IState } from '../IState';
 import { ReactGhLikeDiff } from 'react-gh-like-diff';
-import {Button, Paper, TextField, withStyles, StyledComponentProps, StyleRulesCallback} from '@material-ui/core';
+import {Button, Paper, TextField, withStyles, StyledComponentProps, StyleRulesCallback, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails} from '@material-ui/core';
 import 'react-gh-like-diff/lib/diff2html.min.css';
 import { ButtonProps } from '@material-ui/core/Button';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { CSSProperties, StyleRules } from '@material-ui/core/styles/withStyles';
 
 const methods = {
 	runTest,
@@ -17,6 +19,10 @@ const day = 24 * 3600 * 1000
 
 const defaultStartDate = Math.floor(+new Date() / day) * day
 
+const resultHeadingStyle: CSSProperties = {
+	margin: "0.5em"
+}
+
 const styles: StyleRulesCallback = theme => ({
 	settings: {
 		display: "flex",
@@ -25,6 +31,13 @@ const styles: StyleRulesCallback = theme => ({
 	textField: {
 		width: 200,
 	},
+	resultHeading: {
+		...resultHeadingStyle,
+		fontWeight: "bold"
+	},
+	resultContent: {
+		...resultHeadingStyle,
+	}
 });
 
 interface IPropState {
@@ -54,7 +67,7 @@ export class TestListRaw extends React.Component<IMangledProps, IPropState> {
 	}
 
 	toggle(someId: number) {
-		this.setState({toggles: {...this.state.toggles, [someId]: !this.state.toggles[someId]}})
+		return (_1, expanded) => this.setState({toggles: {...this.state.toggles, [someId]: expanded}})
 	}
 	render() {
 		const {classes} = this.props
@@ -92,22 +105,20 @@ export class TestListRaw extends React.Component<IMangledProps, IPropState> {
 				<Button {...buttonProps("intervalTree S2")}><span>Interval Tree (T2)</span></Button>
 			</Paper>
 			<Paper className="test-results">
-				<ul>
 					{this.props.results.map((r, i) =>
-						<li key={i}>
-							<div className={"test-result"}>
-								<header>
-									<span className={"timestamp"}>{new Date(r.timestamp).toISOString()}</span>
-									<span className={"test-name"}>{r.testName}</span>
-									<a onClick={() => this.toggle(r.timestamp)}>Show Diff</a>
-								</header>
-								{
-									this.state.toggles[r.timestamp] &&
-										<ReactGhLikeDiff diffString={r.diffResult} />
-								}
-							</div>
-						</li>)}
-				</ul>
+						<ExpansionPanel key={i} expanded={this.state.toggles[r.timestamp]} onChange={this.toggle(r.timestamp)}>
+								<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+									<Typography className={classes.resultHeading}>{new Date(r.timestamp).toISOString()}</Typography>
+									<Typography className={classes.resultContent}>{r.testName}</Typography>
+								</ExpansionPanelSummary>
+								<ExpansionPanelDetails>
+									{
+										this.state.toggles[r.timestamp] &&
+											<ReactGhLikeDiff diffString={r.diffResult} /> ||
+											<div>Loading Diff</div>
+									}
+								</ExpansionPanelDetails>
+						</ExpansionPanel>)}
 			</Paper>
 		</div>
 	}
