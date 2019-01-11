@@ -12,14 +12,26 @@ const tests = {
 	"intervalTree S2": (api, args) => intervalTree(api, {...args, rootId: "S2"}),
 }
 
-interface IRunTest {
-	type: "RUN_TEST"
-	testCode: keyof typeof tests
+export interface ITestArgs {
+	startTimeIso: string
+	endTimeIso: string
+	rootId: string
 }
 
-export const runTest = (testCode: IRunTest["testCode"]): IRunTest => ({
+export type ITestCodes = keyof typeof tests
+
+
+interface IRunTest {
+	type: "RUN_TEST"
+	testCode: ITestCodes
+	args: Partial<ITestArgs>
+}
+
+
+export const runTest = (testCode: ITestCodes, args: Partial<ITestArgs>): IRunTest => ({
 	type: "RUN_TEST",
 	testCode,
+	args,
 })
 
 export const RUN_TEST: IRunTest["type"] = "RUN_TEST"
@@ -43,16 +55,17 @@ export const testRunner = function*() {
 	// Map of actions - each linking to a test runner.  Run the test, put the result in state, including diff result - render the result.  Open dialog with diff.
 
 	while (true) {
-		const testSpec: IRunTest = yield take(RUN_TEST)
+		const testRequestAction: IRunTest = yield take(RUN_TEST)
 
-		const args = {
+		const defaultArgs: ITestArgs = {
 			// Move to action
 			startTimeIso: "2018-12-31T00:00:00.000Z",
 			endTimeIso: "2019-01-02T00:00:00.000Z",
 			rootId: "S2",
+			...testRequestAction.args
 		}
 
-		const result: Tests.ITestResultCore = yield call(tests[testSpec.testCode], api, args)
+		const result: Tests.ITestResultCore = yield call(tests[testRequestAction.testCode], api, defaultArgs)
 		// Compare key metrics first.
 		// Run the test for each terminal, as long as the test supports it - and the user has not cancelled it
 		//   Pass the list to the test - and allow the test to determine what to run.
@@ -60,6 +73,6 @@ export const testRunner = function*() {
 		const diffResult = jsdiff.createTwoFilesPatch("BossID", "WasteIQ", prettyAndCut(result.bossID), prettyAndCut(result.wasteIQ))
 		console.log("Diff Result", diffResult)
 
-		yield put(<IStoreTestResult>{type: "STORE_TEST_RESULT", payload: {...result, diffResult, testName: testSpec.testCode, timestamp: +new Date()}})
+		yield put(<IStoreTestResult>{type: "STORE_TEST_RESULT", payload: {...result, diffResult, testName: testRequestAction.testCode, timestamp: +new Date()}})
 	}
 }
