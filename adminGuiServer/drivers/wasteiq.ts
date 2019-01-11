@@ -29,6 +29,46 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 	}
 }
 
+			/** "Vacuum system" specific interval event tree layout, as opposed to more plain inlet/container arrangement */
+			const intervalTreeEnvac = (eventStruct) => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInput) {
+				store {
+					terminal: accessPoint(id: $rootId) {
+						intervalEventTree(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso, intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY",
+							requiredProperties: [$fractionFilter]) {
+								list {
+									startTime
+									endTime
+									endEvent {
+										parent {
+											point {
+												point {
+													tag: externalKey(key: "tag")
+												}
+											}
+										}
+									}
+									point {
+										id
+									}
+									intervalEventTree(intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY", skipLevels: 1,
+										requiredProperties: [$fractionFilter]) {
+										list {
+										point {
+											id
+										}
+										startTime
+										endTime
+										intervalEventTree {
+											${eventStruct}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}`
+
 
 export const createWasteIQDriver = () =>
 	(args: ApiSupportSchema.IStoreArgs, rootValue: IRootValue) => <SourceContracts.ITerminalTest>{
@@ -65,64 +105,28 @@ export const createWasteIQDriver = () =>
 			})))).concat().sort(sortByCompare("timestamp")).map(x => x.block)
 		},
 		intervalTree: async () => {
-			/** "Vacuum system" specific interval event tree layout, as opposed to more plain inlet/container arrangement */
-			const intervalTreeEnvac = `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInput) {
-				store {
-					terminal: accessPoint(id: $rootId) {
-						intervalEventTree(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso, intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY",
-							requiredProperties: [$fractionFilter]) {
-								list {
-									startTime
-									endTime
-									endEvent {
-										parent {
-											point {
-												point {
-													tag: externalKey(key: "tag")
-												}
-											}
-										}
-									}
-									point {
-										id
-									}
-									intervalEventTree(intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY", skipLevels: 1,
-										requiredProperties: [$fractionFilter]) {
-										list {
-										point {
-											id
-										}
-										startTime
-										endTime
-										intervalEventTree {
-											events {
-												point {
-													id
-												}
-												customer {
-													customer {
-														name
-														aggreementGuid: externalKey(key: "PAAvtaleGUID")
-													}
-												}
-												timestamp
-												operatorId: property(key: "operatorId")
-												value: property(key: "weight")
-												srcIdentityId: property(key: "srcIdentityId")
-											}
-										}
-									}
-								}
-							}
-						}
+
+
+			const query = intervalTreeEnvac(`events {
+				point {
+					id
+				}
+				customer {
+					customer {
+						name
+						aggreementGuid: externalKey(key: "PAAvtaleGUID")
 					}
 				}
-			}`
+				timestamp
+				operatorId: property(key: "operatorId")
+				value: property(key: "weight")
+				srcIdentityId: property(key: "srcIdentityId")
+			}`)
 
 			const fractions = ["9999", "1299"]
 
 
-			const results = await Promise.all(fractions.map(fraction => callIt(intervalTreeEnvac, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
 					then(result => parseTree(result.store.terminal.intervalEventTree.list, fraction))))
 			const parsed = Iterable.from(results).pipe(
 				flatMap(x => x),
