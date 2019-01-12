@@ -3,6 +3,7 @@ import { Api } from "../api";
 import { IState } from "../IState";
 import { containerEvents } from "../tests/containerEvents";
 import { intervalTree } from "../tests/intervalTree";
+import { operatorTree } from "../tests/operatorTree";
 
 const jsdiff = require("diff")
 
@@ -10,6 +11,8 @@ const tests = {
 	"containerEvents": containerEvents,
 	"intervalTree S1": (api, args) => intervalTree(api, {...args, rootId: "S1"}),
 	"intervalTree S2": (api, args) => intervalTree(api, {...args, rootId: "S2"}),
+	"operatorTree S1": (api, args) => operatorTree(api, {...args, rootId: "S1"}),
+	"operatorTree S2": (api, args) => operatorTree(api, {...args, rootId: "S2"}),
 }
 
 export interface ITestArgs {

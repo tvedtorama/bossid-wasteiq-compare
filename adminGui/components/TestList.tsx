@@ -4,10 +4,11 @@ import { connect } from 'react-redux';
 import { IState } from '../IState';
 import { ReactGhLikeDiff } from 'react-gh-like-diff';
 import {Button, Paper, TextField, withStyles, StyledComponentProps, StyleRulesCallback, ExpansionPanel, ExpansionPanelSummary, Typography, ExpansionPanelDetails} from '@material-ui/core';
-import 'react-gh-like-diff/lib/diff2html.min.css';
 import { ButtonProps } from '@material-ui/core/Button';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { CSSProperties, StyleRules } from '@material-ui/core/styles/withStyles';
+import { CSSProperties } from '@material-ui/core/styles/withStyles';
+
+import 'react-gh-like-diff/lib/diff2html.min.css';
 
 const methods = {
 	runTest,
@@ -103,6 +104,8 @@ export class TestListRaw extends React.Component<IMangledProps, IPropState> {
 				<Button {...buttonProps("containerEvents")}><span>Container Events</span></Button>
 				<Button {...buttonProps("intervalTree S1")}><span>Interval Tree (T1)</span></Button>
 				<Button {...buttonProps("intervalTree S2")}><span>Interval Tree (T2)</span></Button>
+				<Button {...buttonProps("operatorTree S1")}><span>Operator Tree (T1)</span></Button>
+				<Button {...buttonProps("operatorTree S2")}><span>Operator Tree (T2)</span></Button>
 			</Paper>
 			<Paper className="test-results">
 					{this.props.results.map((r, i) =>
