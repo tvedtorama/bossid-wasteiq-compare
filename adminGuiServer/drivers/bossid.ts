@@ -15,7 +15,7 @@ ORDER BY HendelseDato`;
 const intervalTreeQuery = (startTimeIso: string, endTimeIso: string, customerPart = false, operatorCountPart = false) => `SELECT TH_C.HendelseDato ContainerTimestamp, FT.FraksjonID,
 	TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
 	TE_E.IDPunktBarn ValveBossIdId
-	${operatorCountPart && `, THA.Antall Count, THA.IDKundeAktor OperatorID`}
+	${operatorCountPart && `, THA.Antall Count, THA.IDKundeAktor OperatorID` || ``}
 	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale` || ``}
 FROM [BossID].[dbo].[KundeHendelserContainer] KHC
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_C on TH_C.IDTommeHendelse = KHC.IDTommeHendelse
@@ -23,7 +23,7 @@ INNER JOIN [BossID].[dbo].[TommeHendelser] TH_E ON TH_E.IDTommeHendelse = KHC.ID
 INNER JOIN [BossID].[dbo].[TommeEnhet] TE_C ON TE_C.IDTommeEnhet = TH_C.IDTommeEnhet
 INNER JOIN [BossID].[dbo].[TommeEnhet] TE_E ON TE_E.IDTommeEnhet = TH_E.IDTommeEnhet
 INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON TH_C.IDFraksjon = FT.IDFraksjon
-${operatorCountPart && `INNER JOIN TommeHendelserAktor THA ON THA.IDTommeHendelse = TH_E.IDTommeHendelse` || ``}
+${operatorCountPart && `INNER JOIN [BossID].[dbo].[TommeHendelserAktor] THA ON THA.IDTommeHendelse = TH_E.IDTommeHendelse` || ``}
 ${customerPart && `
 	LEFT OUTER JOIN [BossID].[dbo].[KundeHendelserEnhet] KHE ON KHE.IDTommeHendelse = KHC.IDTommeHendelseEnhet
 	LEFT OUTER JOIN [BossID].[dbo].[KundeHendelser] KH ON KH.IDKundeHendelse = KHE.IDKundeHendelse
