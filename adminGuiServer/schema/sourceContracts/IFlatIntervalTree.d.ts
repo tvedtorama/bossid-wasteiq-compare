@@ -1,10 +1,13 @@
 namespace SourceContracts {
-	interface IFlatIntervalTree {
+	interface ITreeCommon {
 		containerTimestampIso: string
 		containerTag: string
-		fractionCode: string
 		valveTimestampIso: string
 		valveBossIdId: string
+	}
+
+	interface IFlatIntervalTree extends ITreeCommon{
+		fractionCode: string
 		customerEventTimestampIso?: string
 		customerEventOperatorId?: string
 		customerEventIdentityIdentifier?: string

@@ -16,6 +16,7 @@ export interface IEvent extends IHavePoint {
 	parent?: IEvent
 	value: string // Alias
 	srcIdentityId: string // Alias
+	aggKey: string
 	customer?: {
 		customer: {
 			name
@@ -24,6 +25,9 @@ export interface IEvent extends IHavePoint {
 	}
 }
 
+type GroupByAgg = {[P in keyof IEvent]: {keyValue: {key, aggregate: {count: number}}[]}}
+
+
 export interface IInterval extends IHavePoint {
 	startTime: number
 	endTime: number
@@ -31,8 +35,19 @@ export interface IInterval extends IHavePoint {
 	intervalEventTree?: {
 		list?: IInterval[]
 		events?: IEvent[]
+		eventsAggregate?: {
+			count?: number
+			groupBy?: GroupByAgg
+		}
 	}
 }
+
+const common = (contInterval: IInterval, valveInterval: IInterval) => <SourceContracts.IFlatOperatorTree>({
+	containerTag: contInterval.endEvent.parent.point.point.tag,
+	containerTimestampIso: new Date(contInterval.endTime).toISOString(), // Same as endEvent.timestamp
+	valveBossIdId: valveInterval.point.id,
+	valveTimestampIso: new Date(valveInterval.endTime).toISOString(),
+})
 
 /** Flattens the interval tree to a list similar to the one read from BossId */
 export const parseTree = (list: IInterval[], fractionCode: string): Iterable<SourceContracts.IFlatIntervalTree> =>
@@ -40,11 +55,8 @@ export const parseTree = (list: IInterval[], fractionCode: string): Iterable<Sou
 		flatMap(contInterval => Iterable.from(contInterval.intervalEventTree.list).pipe(
 			flatMap(valveInterval => Iterable.from(valveInterval.intervalEventTree.events.length ? valveInterval.intervalEventTree.events : [<IEvent>{customer: {customer: {aggreementGuid: null}}}]).pipe(
 				map(event => <SourceContracts.IFlatIntervalTree>{
-					containerTag: contInterval.endEvent.parent.point.point.tag,
-					containerTimestampIso: new Date(contInterval.endTime).toISOString(), // Same as endEvent.timestamp
+					...common(contInterval, valveInterval),
 					fractionCode,
-					valveBossIdId: valveInterval.point.id,
-					valveTimestampIso: new Date(valveInterval.endTime).toISOString(),
 					customerEventAgreementGuid: event.customer.customer.aggreementGuid,
 					customerEventTimestampIso: event.timestamp ? new Date(event.timestamp).toISOString() : null,
 					customerEventIdentityIdentifier: event.srcIdentityId,
@@ -54,3 +66,18 @@ export const parseTree = (list: IInterval[], fractionCode: string): Iterable<Sou
 			))
 		))
 	)
+
+/** Flattens the interval tree to a list similar to the one read from BossId */
+export const parseOperatorTree = (list: IInterval[], fractionCode: string): Iterable<SourceContracts.IFlatOperatorTree> =>
+Iterable.from(list).pipe(
+	flatMap(contInterval => Iterable.from(contInterval.intervalEventTree.list).pipe(
+		flatMap(valveInterval => Iterable.from(valveInterval.intervalEventTree.eventsAggregate.groupBy.aggKey.keyValue).pipe(
+				map(item => <SourceContracts.IFlatOperatorTree>{
+					...common(contInterval, valveInterval),
+					operatorId: item.key,
+					count: item.aggregate.count,
+				})
+			))
+		))
+	)
+

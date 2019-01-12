@@ -18,8 +18,13 @@ const dummyImpl = (args: ApiSupportSchema.IStoreArgs) => (<SourceContracts.ITerm
 			containerTag: "ABC123",
 			valveBossIdId: "C123",
 		}
-	]
-
+	],
+	valveOperatorCount: async () => [{
+		containerTimestampIso: "1922-12-31T10:00:00.991Z",
+		valveTimestampIso:  "1922-12-31T11:00:00.991Z",
+		containerTag: "ABC123",
+		valveBossIdId: "C123",
+	}]
 })
 
 const sqlClient = (() => {

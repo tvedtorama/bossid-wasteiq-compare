@@ -12,21 +12,27 @@ INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON THC.IDFraksjon = FT.IDFraksjon
 WHERE (HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
 ORDER BY HendelseDato`;
 
-const intervalTreeQuery = (startTimeIso: string, endTimeIso: string) => `SELECT TH_C.HendelseDato ContainerTimestamp, FT.FraksjonID,
+const intervalTreeQuery = (startTimeIso: string, endTimeIso: string, customerPart = false, operatorCountPart = false) => `SELECT TH_C.HendelseDato ContainerTimestamp, FT.FraksjonID,
 	TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
-	TE_E.IDPunktBarn ValveBossIdId,
-	KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale
+	TE_E.IDPunktBarn ValveBossIdId
+	${operatorCountPart && `, THA.Antall Count, THA.IDKundeAktor OperatorID`}
+	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale` || ``}
 FROM [BossID].[dbo].[KundeHendelserContainer] KHC
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_C on TH_C.IDTommeHendelse = KHC.IDTommeHendelse
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_E ON TH_E.IDTommeHendelse = KHC.IDTommeHendelseEnhet
 INNER JOIN [BossID].[dbo].[TommeEnhet] TE_C ON TE_C.IDTommeEnhet = TH_C.IDTommeEnhet
 INNER JOIN [BossID].[dbo].[TommeEnhet] TE_E ON TE_E.IDTommeEnhet = TH_E.IDTommeEnhet
 INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON TH_C.IDFraksjon = FT.IDFraksjon
-LEFT OUTER JOIN [BossID].[dbo].[KundeHendelserEnhet] KHE ON KHE.IDTommeHendelse = KHC.IDTommeHendelseEnhet
-LEFT OUTER JOIN [BossID].[dbo].[KundeHendelser] KH ON KH.IDKundeHendelse = KHE.IDKundeHendelse
-LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
+${operatorCountPart && `INNER JOIN TommeHendelserAktor THA ON THA.IDTommeHendelse = TH_E.IDTommeHendelse` || ``}
+${customerPart && `
+	LEFT OUTER JOIN [BossID].[dbo].[KundeHendelserEnhet] KHE ON KHE.IDTommeHendelse = KHC.IDTommeHendelseEnhet
+	LEFT OUTER JOIN [BossID].[dbo].[KundeHendelser] KH ON KH.IDKundeHendelse = KHE.IDKundeHendelse
+	LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
+` || ``}
 WHERE (TH_C.HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND TH_C.HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
-ORDER BY ContainerTimestamp ASC, ValveTimestamp ASC, CustomerTimestamp ASC`;
+ORDER BY ContainerTimestamp ASC, ValveTimestamp ASC${customerPart && `, CustomerTimestamp ASC` || ``}`;
+
+// Conditionally insert inner join on AktorTommeToms and then list the results, ignoring the fields we don't need
 
 
 const createRowsQuery = (sql: SqlClient) =>
@@ -55,7 +61,7 @@ export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(s
 			}))
 		},
 		intervalTree: async () => {
-			const rowsRaw: any[] = await rowsQuery(intervalTreeQuery(args.startTimeIso, args.endTimeIso))
+			const rowsRaw: any[] = await rowsQuery(intervalTreeQuery(args.startTimeIso, args.endTimeIso, true))
 			return rowsRaw.map(x => (<SourceContracts.IFlatIntervalTree>{
 				containerTimestampIso: convertAndFormatTimestamp(x.ContainerTimestamp),
 				containerTag: x.Tag,
@@ -68,5 +74,18 @@ export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(s
 				customerEventIdentityIdentifier: x.Rfid,
 				customerEventOperatorId: x.IDKundeAktor,
 			}))
+		},
+		valveOperatorCount: async () => {
+			const rowsRaw: any[] = await rowsQuery(intervalTreeQuery(args.startTimeIso, args.endTimeIso, false, true))
+			return rowsRaw.map(x => (<SourceContracts.IFlatOperatorTree>{
+				containerTimestampIso: convertAndFormatTimestamp(x.ContainerTimestamp),
+				containerTag: x.Tag,
+				fractionCode: x.FraksjonID,
+				valveBossIdId: 'C' + x.ValveBossIdId,
+				valveTimestampIso: convertAndFormatTimestamp(x.ValveTimestamp),
+				count: x.Count,
+				operatorId: x.OperatorID,
+			}))
 		}
+
 	}

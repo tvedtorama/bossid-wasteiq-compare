@@ -3,7 +3,7 @@ import {default as Axios} from 'axios'
 import { signJwt } from "../../utils/security/jwt";
 import { IRootValue } from "../schema/IRootValue";
 import { flatten, sortByCompare } from '../../utils/arrays';
-import { parseTree } from './wasteIQHelpers/parseTree';
+import { parseTree, parseOperatorTree } from './wasteIQHelpers/parseTree';
 import { flatMap, orderBy, thenBy } from '@reactivex/ix-es5-cjs/iterable/pipe/index';
 import { Iterable } from '@reactivex/ix-es5-cjs';
 
@@ -105,8 +105,6 @@ export const createWasteIQDriver = () =>
 			})))).concat().sort(sortByCompare("timestamp")).map(x => x.block)
 		},
 		intervalTree: async () => {
-
-
 			const query = intervalTreeEnvac(`events {
 				point {
 					id
@@ -135,5 +133,31 @@ export const createWasteIQDriver = () =>
 			)
 
 			return [...parsed]
-		}
+		},
+		valveOperatorCount: async () => {
+			const query = intervalTreeEnvac(`eventsAggregate(aggKey: "properties.operatorId") {
+				groupBy {
+				  aggKey {
+					keyValue {
+					  key
+					  aggregate {
+						count
+					  }
+					}
+				  }
+				}
+			  }`)
+
+			const fractions = ["9999", "1299"]
+
+
+			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+					then(result => parseOperatorTree(result.store.terminal.intervalEventTree.list, fraction))))
+			const parsed = Iterable.from(results).pipe(
+				flatMap(x => x),
+				orderBy(x => x.valveTimestampIso),
+			)
+
+			return [...parsed]
+		},
 	}

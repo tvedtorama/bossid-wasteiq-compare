@@ -1,21 +1,26 @@
 import { GraphQLObjectType, GraphQLFloat, GraphQLString } from "graphql";
 import { TypedFieldConfigMap } from "../../utils/commonSchema/TypedFieldConfigMap";
 
+export const commonFields: TypedFieldConfigMap<SourceContracts.ITreeCommon> = {
+	containerTimestampIso: {
+		type: GraphQLString,
+	},
+	containerTag: {
+		type: GraphQLString,
+	},
+	valveTimestampIso: {
+		type: GraphQLString,
+	},
+	valveBossIdId: {
+		type: GraphQLString,
+	},
+}
+
+
 export const flatIntervalTree = new GraphQLObjectType({
 	name: "FlatIntervalTree",
 	fields: () => (<TypedFieldConfigMap<SourceContracts.IFlatIntervalTree>>{
-		containerTimestampIso: {
-			type: GraphQLString,
-		},
-		containerTag: {
-			type: GraphQLString,
-		},
-		valveTimestampIso: {
-			type: GraphQLString,
-		},
-		valveBossIdId: {
-			type: GraphQLString,
-		},
+		...commonFields,
 		customerEventTimestampIso: {
 			type: GraphQLString,
 		},
