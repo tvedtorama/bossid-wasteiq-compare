@@ -15,7 +15,9 @@ ORDER BY HendelseDato`;
 const intervalTreeQuery = (startTimeIso: string, endTimeIso: string, customerPart = false, operatorCountPart = false) => `SELECT TH_C.HendelseDato ContainerTimestamp, FT.FraksjonID,
 	TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
 	TE_E.IDPunktBarn ValveBossIdId
-	${operatorCountPart && `, THA.Antall Count, THA.IDKundeAktor OperatorID` || ``}
+	${operatorCountPart && `,
+		ISNULL(THA.Antall, 0) Count, 
+		CASE WHEN THA.IDKundeAktor IS NOT NULL THEN THA.IDKundeAktor ELSE -1 END OperatorID ` || ``}
 	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale` || ``}
 FROM [BossID].[dbo].[KundeHendelserContainer] KHC
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_C on TH_C.IDTommeHendelse = KHC.IDTommeHendelse
@@ -30,7 +32,7 @@ ${customerPart && `
 	LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
 ` || ``}
 WHERE (TH_C.HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND TH_C.HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
-ORDER BY ContainerTimestamp ASC, ValveTimestamp ASC${customerPart && `, CustomerTimestamp ASC` || ``}`;
+ORDER BY ${customerPart && `ContainerTimestamp ASC, ` || ``}ValveTimestamp ASC${customerPart && `, CustomerTimestamp ASC` || ``}`;
 
 // Conditionally insert inner join on AktorTommeToms and then list the results, ignoring the fields we don't need
 
