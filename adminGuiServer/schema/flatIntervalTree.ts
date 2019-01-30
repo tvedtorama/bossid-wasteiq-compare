@@ -38,6 +38,9 @@ export const flatIntervalTree = new GraphQLObjectType({
 		},
 		fractionCode: {
 			type: GraphQLString,
+		},
+		operationMode: {
+			type: GraphQLString,
 		}
 	})
 })

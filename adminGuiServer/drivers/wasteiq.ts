@@ -119,6 +119,7 @@ export const createWasteIQDriver = () =>
 				operatorId: property(key: "operatorId")
 				value: property(key: "weight")
 				srcIdentityId: property(key: "srcIdentityId")
+				operationMode: property(key: "hatchOrOperationType")
 			}`)
 
 			const fractions = ["9999", "1299"]

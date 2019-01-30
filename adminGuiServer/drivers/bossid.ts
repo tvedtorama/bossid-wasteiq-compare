@@ -7,7 +7,7 @@ interface SqlClient {
 const {connectionString} = require.main.require("./connectionString")
 
 const containerEventsQuery = (startTimeIso: string, endTimeIso: string) => `select Merkelapp, HendelseDato, TommeReferanse, FT.FraksjonID
-FROM [dbo].[TommeHendelseContainerBossID] THC
+FROM [BossID].[dbo].[TommeHendelseContainer] THC
 INNER JOIN [BossID].[dbo].[FraksjonsType] FT ON THC.IDFraksjon = FT.IDFraksjon
 WHERE (HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
 ORDER BY HendelseDato`;
@@ -18,7 +18,9 @@ const intervalTreeQuery = (startTimeIso: string, endTimeIso: string, customerPar
 	${operatorCountPart && `,
 		ISNULL(THA.Antall, 0) Count, 
 		CASE WHEN THA.IDKundeAktor IS NOT NULL THEN THA.IDKundeAktor ELSE -1 END OperatorID ` || ``}
-	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale` || ``}
+	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale,
+						CASE KH.IDPunktEgenskap WHEN 2 THEN 'LARGE_HATCH' WHEN 3 THEN 'SMALL_HATCH' WHEN 4 THEN 'TANK' ELSE NULL END AS OperationMode
+				` || ``}
 FROM [BossID].[dbo].[KundeHendelserContainer] KHC
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_C on TH_C.IDTommeHendelse = KHC.IDTommeHendelse
 INNER JOIN [BossID].[dbo].[TommeHendelser] TH_E ON TH_E.IDTommeHendelse = KHC.IDTommeHendelseEnhet
@@ -75,6 +77,7 @@ export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(s
 				customerEventAgreementGuid: x.GUIDAvtale,
 				customerEventIdentityIdentifier: x.Rfid,
 				customerEventOperatorId: x.IDKundeAktor,
+				operationMode: x.OperationMode,
 			}))
 		},
 		valveOperatorCount: async () => {

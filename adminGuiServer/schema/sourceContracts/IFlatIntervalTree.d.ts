@@ -13,5 +13,6 @@ namespace SourceContracts {
 		customerEventIdentityIdentifier?: string
 		customerEventValue?: string
 		customerEventAgreementGuid?: string
+		operationMode?: string
 	}
 }
