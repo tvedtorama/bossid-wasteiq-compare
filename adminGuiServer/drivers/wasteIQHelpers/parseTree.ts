@@ -57,7 +57,7 @@ export const parseTree = (list: IInterval[], fractionCode: string): Iterable<Sou
 				map(event => <SourceContracts.IFlatIntervalTree>{
 					...common(contInterval, valveInterval),
 					fractionCode,
-					customerEventAgreementGuid: event.customer.customer.aggreementGuid,
+					customerEventAgreementGuid: event.customer.customer && event.customer.customer.aggreementGuid,
 					customerEventTimestampIso: event.timestamp ? new Date(event.timestamp).toISOString() : null,
 					customerEventIdentityIdentifier: event.srcIdentityId,
 					customerEventOperatorId: event.operatorId,
