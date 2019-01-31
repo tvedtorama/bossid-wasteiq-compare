@@ -8,7 +8,8 @@ import { operatorTree } from "../tests/operatorTree";
 const jsdiff = require("diff")
 
 const tests = {
-	"containerEvents": containerEvents,
+	"containerEvents S1": (api, args) => containerEvents(api, {...args, rootId: "S1"}),
+	"containerEvents S2": (api, args) => containerEvents(api, {...args, rootId: "S2"}),
 	"intervalTree S1": (api, args) => intervalTree(api, {...args, rootId: "S1"}),
 	"intervalTree S2": (api, args) => intervalTree(api, {...args, rootId: "S2"}),
 	"operatorTree S1": (api, args) => operatorTree(api, {...args, rootId: "S1"}),

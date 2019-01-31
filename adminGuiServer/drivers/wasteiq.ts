@@ -73,6 +73,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 export const createWasteIQDriver = () =>
 	(args: ApiSupportSchema.IStoreArgs, rootValue: IRootValue) => <SourceContracts.ITerminalTest>{
 		containerEvents: async () => {
+			// Note: Uses 'child events' to find terminal/root relation client side.
 			const graphQlQuery = `query($startTimeIso: DateTime, $endTimeIso: DateTime) {
 					store {
 						accessPoint(id: "CONTAINER_ROOT") {
@@ -83,6 +84,11 @@ export const createWasteIQDriver = () =>
 									timestamp
 									type
 									fraction: property(key: "fraction")
+									children { 
+										point {
+											id
+										}
+									}	
 								}
 							}
 						}
@@ -94,7 +100,7 @@ export const createWasteIQDriver = () =>
 
 			// Move called to separate function and ADD SORTING
 
-			return flatten<{block, timestamp}>(result.store.accessPoint.children.filter(x => x.events).map(({tag, events}) => events.map(e => ({
+			return flatten<{block, timestamp, rootId}>(result.store.accessPoint.children.filter(x => x.events).map(({tag, events}) => events.map(e => ({
 				block: {
 					fraction: e.fraction,
 					pointReference: tag,
@@ -102,7 +108,9 @@ export const createWasteIQDriver = () =>
 					type: e.type,
 				},
 				timestamp: e.timestamp,
-			})))).concat().sort(sortByCompare("timestamp")).map(x => x.block)
+				rootId: (e.children || []).map(c => c.point.id)[0],
+			})))).
+			filter(x => x.rootId === args.rootId).concat().sort(sortByCompare("timestamp")).map(x => x.block)
 		},
 		intervalTree: async () => {
 			const query = intervalTreeEnvac(`events {

@@ -101,7 +101,8 @@ export class TestListRaw extends React.Component<IMangledProps, IPropState> {
 
 			</Paper>
 			<Paper className="test-buttons">
-				<Button {...buttonProps("containerEvents")}><span>Container Events</span></Button>
+				<Button {...buttonProps("containerEvents S1")}><span>Container Events (T1)</span></Button>
+				<Button {...buttonProps("containerEvents S2")}><span>Container Events (T2)</span></Button>
 				<Button {...buttonProps("intervalTree S1")}><span>Interval Tree (T1)</span></Button>
 				<Button {...buttonProps("intervalTree S2")}><span>Interval Tree (T2)</span></Button>
 				<Button {...buttonProps("operatorTree S1")}><span>Operator Tree (T1)</span></Button>
