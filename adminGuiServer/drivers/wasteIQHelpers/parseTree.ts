@@ -13,6 +13,7 @@ interface IHavePoint {
 export interface IEvent extends IHavePoint {
 	timestamp: number
 	operatorId: string // Alias
+	type?: string
 	parent?: IEvent
 	value: string // Alias
 	srcIdentityId: string // Alias
@@ -27,19 +28,21 @@ export interface IEvent extends IHavePoint {
 
 type GroupByAgg = {[P in keyof IEvent]: {keyValue: {key, aggregate: {count: number}}[]}}
 
+export interface IIntervalEventTree {
+	list?: IInterval[]
+	events?: IEvent[]
+	eventsAggregate?: {
+		count?: number
+		groupBy?: GroupByAgg
+	}
+}
 
 export interface IInterval extends IHavePoint {
 	startTime: number
 	endTime: number
 	endEvent: IEvent
-	intervalEventTree?: {
-		list?: IInterval[]
-		events?: IEvent[]
-		eventsAggregate?: {
-			count?: number
-			groupBy?: GroupByAgg
-		}
-	}
+	intervalEventTree?: IIntervalEventTree
+	litterbins?: IIntervalEventTree
 }
 
 const common = (contInterval: IInterval, valveInterval: IInterval) => <SourceContracts.IFlatOperatorTree>({
@@ -53,7 +56,17 @@ const common = (contInterval: IInterval, valveInterval: IInterval) => <SourceCon
 export const parseTree = (list: IInterval[], fractionCode: string): Iterable<SourceContracts.IFlatIntervalTree> =>
 	Iterable.from(list).pipe(
 		flatMap(contInterval => Iterable.from(contInterval.intervalEventTree.list).pipe(
-			flatMap(valveInterval => Iterable.from(valveInterval.intervalEventTree.events.length ? valveInterval.intervalEventTree.events : [<IEvent>{customer: {customer: {aggreementGuid: null}}}]).pipe(
+			flatMap(valveInterval => Iterable.from(
+				[valveInterval.litterbins.events.filter(x => x.type !== "EMPTY")]
+				.map(lbEvents => [
+					valveInterval.intervalEventTree.events.length ? 
+						valveInterval.intervalEventTree.events :
+						lbEvents.length ? 
+							[] :
+							[<IEvent>{customer: {customer: {aggreementGuid: null}}}],
+					lbEvents,
+			])[0]).pipe(
+				flatMap(items => items),
 				map(event => <SourceContracts.IFlatIntervalTree>{
 					...common(contInterval, valveInterval),
 					fractionCode,
@@ -70,14 +83,19 @@ export const parseTree = (list: IInterval[], fractionCode: string): Iterable<Sou
 /** Flattens the interval tree to a list similar to the one read from BossId */
 export const parseOperatorTree = (list: IInterval[], fractionCode: string): Iterable<SourceContracts.IFlatOperatorTree> =>
 Iterable.from(list).pipe(
-	flatMap(contInterval => Iterable.from(contInterval.intervalEventTree.list).pipe(
-		flatMap(valveInterval => Iterable.from(valveInterval.intervalEventTree.eventsAggregate.groupBy.aggKey.keyValue).pipe(
-				map(item => <SourceContracts.IFlatOperatorTree>{
-					...common(contInterval, valveInterval),
-					operatorId: item.key,
-					count: item.aggregate.count,
-				})
-			))
-		))
+		flatMap(contInterval => Iterable.from(contInterval.intervalEventTree.list).pipe(
+			flatMap(valveInterval => Iterable.from([
+										valveInterval.intervalEventTree.eventsAggregate.groupBy.aggKey.keyValue,
+										valveInterval.litterbins.eventsAggregate.groupBy.aggKey.keyValue,
+									]).pipe(
+					flatMap(items => items),
+					map(item => <SourceContracts.IFlatOperatorTree>{
+						...common(contInterval, valveInterval),
+						operatorId: item.key,
+						count: item.aggregate.count,
+					})
+				))
+			)),
+		filter(x => x.operatorId !== "undefined")
 	)
 

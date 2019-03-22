@@ -58,6 +58,9 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 										}
 										startTime
 										endTime
+										litterbins: intervalEventTree(skipLevels: -1) {
+											${eventStruct}
+										}
 										intervalEventTree {
 											${eventStruct}
 										}
