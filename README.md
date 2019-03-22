@@ -10,5 +10,4 @@ NB: ATW we the key and audience must match with wasteIQ
 
 Default GraphQL url: http://127.0.0.1:3000/publicgraphql
 
-Except that on Windows, envs must be set with SET.
-
+Except that on Windows, envs must be set with SET.   Except that you can use `.env` files.
