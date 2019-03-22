@@ -108,9 +108,9 @@ export const createWasteIQDriver = () =>
 					type: e.type,
 				},
 				timestamp: e.timestamp,
-				rootId: (e.children || []).map(c => c.point.id)[0],
+				rootId: (e.children || []).map(c => c.point.id)[0] || "N/A",  // Read serviceId from child point, in case this is missing: "N/A" (this should be an companion point)
 			})))).
-			filter(x => x.rootId === args.rootId).concat().sort(sortByCompare("timestamp")).map(x => x.block)
+			filter(x => x.rootId === "N/A" || x.rootId === args.rootId).concat().sort(sortByCompare("timestamp")).map(x => x.block)
 		},
 		intervalTree: async () => {
 			const query = intervalTreeEnvac(`events {
