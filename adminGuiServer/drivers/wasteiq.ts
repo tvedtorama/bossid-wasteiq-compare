@@ -130,7 +130,7 @@ export const createWasteIQDriver = () =>
 				operationMode: property(key: "hatchOrOperationType")
 			}`)
 
-			const fractions = ["9999", "1299"]
+			const fractions = ["9999", "129917"]
 
 
 			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
@@ -157,7 +157,7 @@ export const createWasteIQDriver = () =>
 				}
 			  }`)
 
-			const fractions = ["9999", "1299"]
+			const fractions = ["9999", "129917"]
 
 
 			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
