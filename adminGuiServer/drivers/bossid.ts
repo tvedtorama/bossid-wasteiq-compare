@@ -17,7 +17,7 @@ const intervalTreeQuery = (serviceId: number, startTimeIso: string, endTimeIso: 
 	TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
 	TE_E.IDPunktBarn ValveBossIdId
 	${operatorCountPart && `,
-		ISNULL(THA.Antall, 0) Count, 
+		ISNULL(SUM(THA.Antall), 0) Count, 
 		CASE WHEN THA.IDKundeAktor IS NOT NULL THEN THA.IDKundeAktor ELSE -1 END OperatorID ` || ``}
 	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale,
 						CASE KH.IDPunktEgenskap WHEN 2 THEN 'LARGE_HATCH' WHEN 3 THEN 'SMALL_HATCH' WHEN 4 THEN 'TANK' ELSE NULL END AS OperationMode
@@ -35,6 +35,7 @@ ${customerPart && `
 	LEFT OUTER JOIN [BossID].[dbo].[KundeEnhet] KE ON KE.IDKundeEnhet = KH.IDKundeEnhet
 ` || ``}
 WHERE TE_C.IDTjeneste = ${serviceId} AND (TH_C.HendelseDato >= '${startTimeIso || "2000-01-01T00:00Z"}' AND TH_C.HendelseDato < '${endTimeIso || "2100-01-01T00:00Z"}')
+${operatorCountPart && ` GROUP BY TH_C.HendelseDato, FT.FraksjonID, THA.IDKundeAktor, TE_C.Merkelapp, TH_E.HendelseDato, TE_E.IDPunktBarn ` || ``}
 ORDER BY ${customerPart && `ContainerTimestamp ASC, ` || ``}ValveTimestamp ASC${customerPart && `, CustomerTimestamp ASC` || ``}`;
 
 // Conditionally insert inner join on AktorTommeToms and then list the results, ignoring the fields we don't need
