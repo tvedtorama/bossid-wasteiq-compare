@@ -24,7 +24,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 		// console.log("result", result.data.data)
 		return result.data.data
 	} catch (err) {
-		console.error("Error calling graphQL", err)
+		console.error("Error calling graphQL", (err.response && err.response.data) || err.data || err)
 		throw err
 	}
 }
