@@ -30,7 +30,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 }
 
 			/** "Vacuum system" specific interval event tree layout, as opposed to more plain inlet/container arrangement */
-			const intervalTreeEnvac = (eventStruct) => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInput) {
+			const intervalTreeEnvac = (eventStruct) => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInputWithList) {
 				store {
 					terminal: accessPoint(id: $rootId) {
 						intervalEventTree(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso, intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY",
