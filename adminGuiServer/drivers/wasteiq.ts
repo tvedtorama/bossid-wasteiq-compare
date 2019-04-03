@@ -127,6 +127,7 @@ export const createWasteIQDriver = () =>
 					}
 				}
 				timestamp
+				type
 				operatorId: property(key: "operatorId")
 				value: property(key: "weight")
 				srcIdentityId: property(key: "srcIdentityId")
