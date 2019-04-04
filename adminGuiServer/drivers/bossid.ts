@@ -53,7 +53,7 @@ const createRowsQuery = (sql: SqlClient) =>
 })
 
 const convertAndFormatTimestamp = (timestamp: Date) =>
-	timestamp && new Date(Math.floor((+timestamp - 3600000) / 1000) * 1000).toISOString()
+	timestamp && new Date(Math.floor((+timestamp + timestamp.getTimezoneOffset() * 60000) / 1000) * 1000).toISOString()
 
 const serviceFromRootId = (args: ApiSupportSchema.IStoreArgs) => parseInt(args.rootId.substr(1))
 
