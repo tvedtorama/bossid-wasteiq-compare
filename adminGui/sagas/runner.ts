@@ -45,7 +45,7 @@ export interface IStoreTestResult {
 	payload: Tests.ITestResult
 }
 
-const MAX_LENGTH_COMPARE_STRING = 40000 // 1000 * 40
+const MAX_LENGTH_COMPARE_STRING = 100000 // 1000 * 40
 
 const pretty = (a: any) => JSON.stringify(a, null, 2)
 const prettyAndCut = (a: any, vp = pretty(a)) => vp.length <= MAX_LENGTH_COMPARE_STRING ? vp :
