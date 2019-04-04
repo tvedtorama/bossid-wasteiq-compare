@@ -79,7 +79,7 @@ export const createBossIdDriver = (sql: SqlClient, rowsQuery = createRowsQuery(s
 				customerEventTimestampIso: convertAndFormatTimestamp(x.CustomerTimestamp),
 				customerEventValue: x.Verdi,
 				customerEventAgreementGuid: x.GUIDAvtale,
-				customerEventIdentityIdentifier: x.Rfid,
+				// customerEventIdentityIdentifier: x.Rfid, Suddenly ISO values...
 				customerEventOperatorId: x.IDKundeAktor,
 				operationMode: x.OperationMode,
 			}))

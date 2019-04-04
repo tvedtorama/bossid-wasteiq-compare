@@ -72,7 +72,7 @@ export const parseTree = (list: IInterval[], fractionCode: string): Iterable<Sou
 					fractionCode,
 					customerEventAgreementGuid: event.customer.customer && event.customer.customer.aggreementGuid,
 					customerEventTimestampIso: event.timestamp ? new Date(event.timestamp).toISOString() : null,
-					customerEventIdentityIdentifier: event.srcIdentityId,
+					// customerEventIdentityIdentifier: event.srcIdentityId,
 					customerEventOperatorId: event.operatorId,
 					customerEventValue: event.value,
 				})
