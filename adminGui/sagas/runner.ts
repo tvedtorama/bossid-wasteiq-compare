@@ -8,7 +8,8 @@ import { operatorTree } from "../tests/operatorTree";
 const jsdiff = require("diff")
 
 const tests = {
-	"containerEvents": containerEvents,
+	"containerEvents S1": (api, args) => containerEvents(api, {...args, rootId: "S1"}),
+	"containerEvents S2": (api, args) => containerEvents(api, {...args, rootId: "S2"}),
 	"intervalTree S1": (api, args) => intervalTree(api, {...args, rootId: "S1"}),
 	"intervalTree S2": (api, args) => intervalTree(api, {...args, rootId: "S2"}),
 	"operatorTree S1": (api, args) => operatorTree(api, {...args, rootId: "S1"}),
@@ -44,7 +45,7 @@ export interface IStoreTestResult {
 	payload: Tests.ITestResult
 }
 
-const MAX_LENGTH_COMPARE_STRING = 40000 // 1000 * 40
+const MAX_LENGTH_COMPARE_STRING = 100000 // 1000 * 40
 
 const pretty = (a: any) => JSON.stringify(a, null, 2)
 const prettyAndCut = (a: any, vp = pretty(a)) => vp.length <= MAX_LENGTH_COMPARE_STRING ? vp :

@@ -24,13 +24,13 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 		// console.log("result", result.data.data)
 		return result.data.data
 	} catch (err) {
-		console.error("Error calling graphQL", err)
+		console.error("Error calling graphQL", (err.response && err.response.data) || err.data || err)
 		throw err
 	}
 }
 
 			/** "Vacuum system" specific interval event tree layout, as opposed to more plain inlet/container arrangement */
-			const intervalTreeEnvac = (eventStruct) => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInput) {
+			const intervalTreeEnvac = (eventStruct) => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInputWithList) {
 				store {
 					terminal: accessPoint(id: $rootId) {
 						intervalEventTree(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso, intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY",
@@ -58,6 +58,9 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 										}
 										startTime
 										endTime
+										litterbins: intervalEventTree(skipLevels: -1) {
+											${eventStruct}
+										}
 										intervalEventTree {
 											${eventStruct}
 										}
@@ -73,6 +76,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 export const createWasteIQDriver = () =>
 	(args: ApiSupportSchema.IStoreArgs, rootValue: IRootValue) => <SourceContracts.ITerminalTest>{
 		containerEvents: async () => {
+			// Note: Uses 'child events' to find terminal/root relation client side.
 			const graphQlQuery = `query($startTimeIso: DateTime, $endTimeIso: DateTime) {
 					store {
 						accessPoint(id: "CONTAINER_ROOT") {
@@ -83,6 +87,11 @@ export const createWasteIQDriver = () =>
 									timestamp
 									type
 									fraction: property(key: "fraction")
+									children { 
+										point {
+											id
+										}
+									}	
 								}
 							}
 						}
@@ -94,7 +103,7 @@ export const createWasteIQDriver = () =>
 
 			// Move called to separate function and ADD SORTING
 
-			return flatten<{block, timestamp}>(result.store.accessPoint.children.filter(x => x.events).map(({tag, events}) => events.map(e => ({
+			return flatten<{block, timestamp, rootId}>(result.store.accessPoint.children.filter(x => x.events).map(({tag, events}) => events.map(e => ({
 				block: {
 					fraction: e.fraction,
 					pointReference: tag,
@@ -102,7 +111,9 @@ export const createWasteIQDriver = () =>
 					type: e.type,
 				},
 				timestamp: e.timestamp,
-			})))).concat().sort(sortByCompare("timestamp")).map(x => x.block)
+				rootId: (e.children || []).map(c => c.point.id)[0] || "N/A",  // Read serviceId from child point, in case this is missing: "N/A" (this should be an companion point)
+			})))).
+			filter(x => x.rootId === "N/A" || x.rootId === args.rootId).concat().sort(sortByCompare("timestamp")).map(x => x.block)
 		},
 		intervalTree: async () => {
 			const query = intervalTreeEnvac(`events {
@@ -116,12 +127,14 @@ export const createWasteIQDriver = () =>
 					}
 				}
 				timestamp
+				type
 				operatorId: property(key: "operatorId")
 				value: property(key: "weight")
 				srcIdentityId: property(key: "srcIdentityId")
+				operationMode: property(key: "hatchOrOperationType")
 			}`)
 
-			const fractions = ["9999", "1299"]
+			const fractions = ["9999", "129917"]
 
 
 			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
@@ -148,7 +161,7 @@ export const createWasteIQDriver = () =>
 				}
 			  }`)
 
-			const fractions = ["9999", "1299"]
+			const fractions = ["9999", "129917"]
 
 
 			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
