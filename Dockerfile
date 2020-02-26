@@ -23,13 +23,15 @@ WORKDIR /code
 COPY --from=deps /tmp/deps.json ./package.json
 COPY package-lock.json* ./
 RUN npm install --production && npm cache clean --force
-COPY package.json ./
 ENV PATH /code/node_modules/.bin:$PATH
 
 # copy in our source code last, as it changes the most
 COPY ./index.js /code
 COPY ./build /code/build
 COPY ./public /code/public/
+
+# Restore original, with version and all the content
+COPY package.json ./
 
 # RUN apk add --update bash && rm -rf /var/cache/apk/*
 
