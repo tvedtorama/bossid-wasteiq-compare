@@ -26,7 +26,7 @@ const args = parser.parseArgs()
 		
 const app = express()
 
-const serverApp = process.env["serverApp"] || "adminGUIServer"
+const serverApp = process.env["serverApp"] || "adminGuiServer"
 
 app.disable('x-powered-by');
 const viewsRootPath = fs.existsSync(path.join(__dirname, '/views')) ? path.join(__dirname, '/views') : path.join(__dirname, `/${serverApp}/views`)
