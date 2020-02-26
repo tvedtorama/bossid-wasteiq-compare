@@ -1,4 +1,10 @@
-FROM node:10.15.3-alpine
+FROM node:12-alpine AS deps
+
+RUN apk add jq
+COPY package.json /tmp
+RUN jq '{ dependencies, devDependencies }' < /tmp/package.json > /tmp/deps.json
+
+FROM node:12-alpine
 
 RUN mkdir -p /code
 
@@ -12,10 +18,12 @@ ARG PORT=3000
 ENV PORT $PORT
 EXPOSE $PORT
 
-# install dependencies first, in a different location for easier app bind mounting for local development
+# install dependencies first, with just dependencies, to avoid version numbers breaking cache
 WORKDIR /code
-COPY package.json package-lock.json* ./
+COPY --from=deps /tmp/deps.json ./package.json
+COPY package-lock.json* ./
 RUN npm install --production && npm cache clean --force
+COPY package.json ./
 ENV PATH /code/node_modules/.bin:$PATH
 
 # copy in our source code last, as it changes the most
