@@ -1,6 +1,6 @@
 {
   "name": "bossid-wasteiq-compare",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Compare BossID to WasteIQ on data and calculations",
   "main": "index.js",
   "scripts": {
