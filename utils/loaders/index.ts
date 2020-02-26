@@ -1,6 +1,5 @@
 /// <reference path="../commonSchema/ICommonSchemaArgs.ts" />
 
-import * as _ from 'lodash'
 import { initDbInfoAndSetupDataLoaders, IDBInfo } from './initDbInfo';
 
 export interface IJwtUser {
