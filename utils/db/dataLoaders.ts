@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import {IDBInfo} from './dbResolver'
 
 export interface IDataLoader {
@@ -18,8 +17,8 @@ export function initDataLoaders() {
 	DataLoader = require("dataloader")
 }
 
-// Deletes the stored dataloaders, does not clear the data loaders' cache - whcih should be done conditionally later (TODO)
-const clearAllCache = () => _.keys(dlMap).forEach(x => delete dlMap[x])
+// Deletes the stored dataloaders, does not clear the data loaders' cache - which should be done conditionally later (TODO)
+const clearAllCache = () => Object.keys(dlMap).forEach(x => delete dlMap[x])
 const clearAllCacheFromExtEvent = (eventObject) => {
 	console.log("Clear cache from extenal events")
 	clearAllCache()
