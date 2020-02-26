@@ -1,10 +1,11 @@
 {
   "name": "bossid-wasteiq-compare",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Compare BossID to WasteIQ on data and calculations",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:docker": "tsc && docker build -t wasteiq/bossid-wasteiq-compare:$(git describe --always --dirty) -t wasteiq/bossid-wasteiq-compare:latest ."
   },
   "repository": {
     "type": "git",
