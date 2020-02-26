@@ -11,3 +11,12 @@ NB: ATW we the key and audience must match with wasteIQ
 Default GraphQL url: http://127.0.0.1:3000/publicgraphql
 
 Except that on Windows, envs must be set with SET.   Except that you can use `.env` files.
+
+## Compare WIQs
+
+Use `GRAPHQL_URL_SECONDARY`.
+
+
+## Docker
+
+Dockerfile will build without SQL support. SQL hence not supported for Docker, right now. 

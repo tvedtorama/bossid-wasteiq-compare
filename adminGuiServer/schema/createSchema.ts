@@ -31,6 +31,10 @@ export const createSchema = () => new GraphQLSchema({
 							type: terminalTestSchema,
 							resolve: (store: ApiSupportSchema.ICoreStore, _1, _2, {rootValue}) => getWasteIQDriver()(store.getArgs(), rootValue),
 						},
+						wasteIQSecondary: {
+							type: terminalTestSchema,
+							resolve: (store: ApiSupportSchema.ICoreStore, _1, _2, {rootValue}) => getWasteIQDriver("SECONDARY")(store.getArgs(), rootValue),
+						},
 						bossID: {
 							type: terminalTestSchema,
 							resolve: (store: ApiSupportSchema.ICoreStore) => getBossIdDriver()(store.getArgs()),

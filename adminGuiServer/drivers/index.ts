@@ -36,4 +36,4 @@ const sqlClient = (() => {
 })();
 
 export const getBossIdDriver = () => sqlClient ? createBossIdDriver(sqlClient) : dummyImpl
-export const getWasteIQDriver = () => createWasteIQDriver()
+export const getWasteIQDriver = (variant?: "SECONDARY") => createWasteIQDriver(variant)

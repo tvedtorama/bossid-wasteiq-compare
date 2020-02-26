@@ -1,5 +1,6 @@
 import {default as Axios} from 'axios'
 
+import {Some} from "monet"
 import { signJwt } from "../../utils/security/jwt";
 import { IRootValue } from "../schema/IRootValue";
 import { flatten, sortByCompare } from '../../utils/arrays';
@@ -8,12 +9,15 @@ import { flatMap, orderBy, thenBy } from '@reactivex/ix-es5-cjs/iterable/pipe/in
 import { Iterable } from '@reactivex/ix-es5-cjs';
 
 const url = process.env.GRAPHQL_URL || "http://127.0.0.1:3000/publicgraphql"
+const urlSecondary = process.env.GRAPHQL_URL_SECONDARY || null
 
-const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: string, args: T, rootValue: IRootValue): Promise<{store: any}> => {
+const callIt = async <T extends ApiSupportSchema.IStoreArgs>(url: string, graphQlQuery: string, args: T, rootValue: IRootValue): Promise<{store: any}> => {
 	const variables = args
-			// WARNING: assumes the two systems audience and secure keys are the same
-			const token = await signJwt(rootValue.user.sub, rootValue.user.sub)
+	// WARNING: assumes the two systems audience and secure keys are the same
+	const token = await signJwt(rootValue.user.sub, rootValue.user.sub)
 	try {
+		if (!url)
+			throw new Error("URL not specified for the given site")
 		const result = await Axios.post(url, {
 			query: graphQlQuery,
 			token,
@@ -73,7 +77,8 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(graphQlQuery: strin
 			}`
 
 
-export const createWasteIQDriver = () =>
+export const createWasteIQDriver = (variant?: "SECONDARY") =>
+	Some(variant === "SECONDARY" ? urlSecondary : url).map(urlToUse =>
 	(args: ApiSupportSchema.IStoreArgs, rootValue: IRootValue) => <SourceContracts.ITerminalTest>{
 		containerEvents: async () => {
 			// Note: Uses 'child events' to find terminal/root relation client side.
@@ -87,11 +92,11 @@ export const createWasteIQDriver = () =>
 									timestamp
 									type
 									fraction: property(key: "fraction")
-									children { 
+									children {
 										point {
 											id
 										}
-									}	
+									}
 								}
 							}
 						}
@@ -99,7 +104,7 @@ export const createWasteIQDriver = () =>
 				}`
 
 
-			const result = await callIt(graphQlQuery, args, rootValue)
+			const result = await callIt(urlToUse, graphQlQuery, args, rootValue)
 
 			// Move called to separate function and ADD SORTING
 
@@ -123,7 +128,7 @@ export const createWasteIQDriver = () =>
 				customer {
 					customer {
 						name
-						aggreementGuid: externalKey(key: "PAAvtaleGUID")
+						agreementGuid: externalKey(key: "PAAvtaleGUID")
 					}
 				}
 				timestamp
@@ -137,7 +142,7 @@ export const createWasteIQDriver = () =>
 			const fractions = ["9999", "129917"]
 
 
-			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+			const results = await Promise.all(fractions.map(fraction => callIt(urlToUse, query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
 					then(result => parseTree(result.store.terminal.intervalEventTree.list, fraction))))
 			const parsed = Iterable.from(results).pipe(
 				flatMap(x => x),
@@ -164,7 +169,7 @@ export const createWasteIQDriver = () =>
 			const fractions = ["9999", "129917"]
 
 
-			const results = await Promise.all(fractions.map(fraction => callIt(query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+			const results = await Promise.all(fractions.map(fraction => callIt(urlToUse, query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
 					then(result => parseOperatorTree(result.store.terminal.intervalEventTree.list, fraction))))
 			const parsed = Iterable.from(results).pipe(
 				flatMap(x => x),
@@ -173,4 +178,4 @@ export const createWasteIQDriver = () =>
 
 			return [...parsed]
 		},
-	}
+	}).some()

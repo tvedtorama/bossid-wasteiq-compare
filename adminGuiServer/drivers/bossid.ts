@@ -17,7 +17,7 @@ const intervalTreeQuery = (serviceId: number, startTimeIso: string, endTimeIso: 
 	TE_C.Merkelapp Tag, TH_E.HendelseDato ValveTimestamp,
 	TE_E.IDPunktBarn ValveBossIdId
 	${operatorCountPart && `,
-		ISNULL(SUM(THA.Antall), 0) Count, 
+		ISNULL(SUM(THA.Antall), 0) Count,
 		CASE WHEN THA.IDKundeAktor IS NOT NULL THEN THA.IDKundeAktor ELSE -1 END OperatorID ` || ``}
 	${customerPart && `, KH.HendelseTidspunkt CustomerTimestamp, KH.IDKundeAktor, KH.Rfid, KH.Verdi, KE.GUIDAvtale,
 						CASE KH.IDPunktEgenskap WHEN 2 THEN 'LARGE_HATCH' WHEN 3 THEN 'SMALL_HATCH' WHEN 4 THEN 'TANK' ELSE NULL END AS OperationMode
