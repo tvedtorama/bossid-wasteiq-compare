@@ -27,6 +27,7 @@ ENV PATH /code/node_modules/.bin:$PATH
 
 # copy in our source code last, as it changes the most
 COPY ./index.js /code
+COPY ./connectionString.js /code
 COPY ./build /code/build
 COPY ./public /code/public/
 
