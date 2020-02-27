@@ -12,6 +12,9 @@ Default GraphQL url: http://127.0.0.1:3000/publicgraphql
 
 Except that on Windows, envs must be set with SET.   Except that you can use `.env` files.
 
+## Fractions
+NB: Interval tree hard coded to run with a set of fractions, one call to WIQ for each.
+
 ## Compare WIQs
 
 Use `GRAPHQL_URL_SECONDARY`.
