@@ -18,7 +18,8 @@ export function fetchOrgSuccess(fullStore: Partial<IStore>): Action {
 export function* fetchStartData(api: Api, doneCallback: () => void): Iterator<any> {
 	yield put({type: GENERIC_PROCESS_START, key: START_DATA_GENERIC_PROCESS_KEY})
 	try {
-		const x = yield call(() => api.getStartItems())
+		// This is actually typed as "undefined" without the explicit type. WHY?  Similar code in WIQ, does not produce the same result.
+		const x: any = yield call(() => api.getStartItems())
 		yield put(fetchOrgSuccess(x.store))
 		doneCallback()
 	} finally {
