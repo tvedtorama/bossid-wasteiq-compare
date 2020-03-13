@@ -7,6 +7,11 @@ const favicon = require('serve-favicon')
 const path = require('path')
 const fs = require('fs')
 
+if (!(process.env.MAIN_SECRET_KEY && process.env.MAIN_AUDIENCE)) {
+	console.error("Please provide MAIN_SECRET_KEY and MAIN_AUDIENCE, or this will not work")
+	process.exit()
+}
+
 const {ArgumentParser} = require('argparse');
 var parser = new ArgumentParser({
   version: '0.0.1',
