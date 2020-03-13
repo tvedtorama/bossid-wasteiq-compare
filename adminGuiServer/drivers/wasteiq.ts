@@ -7,9 +7,16 @@ import { flatten, sortByCompare } from '../../utils/arrays';
 import { parseTree, parseOperatorTree } from './wasteIQHelpers/parseTree';
 import { flatMap, orderBy, thenBy } from '@reactivex/ix-es5-cjs/iterable/pipe/index';
 import { Iterable } from '@reactivex/ix-es5-cjs';
+import { gte } from 'semver'
 
-const url = process.env.GRAPHQL_URL || "http://127.0.0.1:3000/publicgraphql"
-const urlSecondary = process.env.GRAPHQL_URL_SECONDARY || null
+const primary = {
+	url: process.env.GRAPHQL_URL || "http://127.0.0.1:3000/publicgraphql",
+	version: process.env.WIQ_VERSION
+}
+const secondary = {
+	url: process.env.GRAPHQL_URL_SECONDARY || null,
+	version: process.env.WIQ_SECONDARY_VERSION
+}
 
 const callIt = async <T extends ApiSupportSchema.IStoreArgs>(url: string, graphQlQuery: string, args: T, rootValue: IRootValue): Promise<{store: any}> => {
 	const variables = args
@@ -34,7 +41,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(url: string, graphQ
 }
 
 			/** "Vacuum system" specific interval event tree layout, as opposed to more plain inlet/container arrangement */
-			const intervalTreeEnvac = (eventStruct) => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInputWithList) {
+			const intervalTreeEnvac = (eventStruct: string, version = "1.12.1") => `query($rootId: String, $startTimeIso: DateTime, $endTimeIso: DateTime, $fractionFilter: KeyValueInputWithList) {
 				store {
 					terminal: accessPoint(id: $rootId) {
 						intervalEventTree(startTimeIso: $startTimeIso, endTimeIso: $endTimeIso, intervalStartEventType: "EMPTY", intervalEndEventType: "EMPTY",
@@ -62,7 +69,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(url: string, graphQ
 										}
 										startTime
 										endTime
-										litterbins: intervalEventTree(skipLevels: -1) {
+										litterbins: intervalEventTree(skipLevels: -1 ${gte(version, "1.12.1") ? ", shiftIntervals: 1" : ""}) {
 											${eventStruct}
 										}
 										intervalEventTree {
@@ -78,7 +85,7 @@ const callIt = async <T extends ApiSupportSchema.IStoreArgs>(url: string, graphQ
 
 
 export const createWasteIQDriver = (variant?: "SECONDARY") =>
-	Some(variant === "SECONDARY" ? urlSecondary : url).map(urlToUse =>
+	Some(variant === "SECONDARY" ? secondary : primary).map(({url, version}) =>
 	(args: ApiSupportSchema.IStoreArgs, rootValue: IRootValue) => <SourceContracts.ITerminalTest>{
 		containerEvents: async () => {
 			// Note: Uses 'child events' to find terminal/root relation client side.
@@ -104,7 +111,7 @@ export const createWasteIQDriver = (variant?: "SECONDARY") =>
 				}`
 
 
-			const result = await callIt(urlToUse, graphQlQuery, args, rootValue)
+			const result = await callIt(url, graphQlQuery, args, rootValue)
 
 			// Move called to separate function and ADD SORTING
 
@@ -137,12 +144,12 @@ export const createWasteIQDriver = (variant?: "SECONDARY") =>
 				value: property(key: "weight")
 				srcIdentityId: property(key: "srcIdentityId")
 				operationMode: property(key: "hatchOrOperationType")
-			}`)
+			}`, version)
 
 			const fractions = ["9999", "129917"]
 
 
-			const results = await Promise.all(fractions.map(fraction => callIt(urlToUse, query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+			const results = await Promise.all(fractions.map(fraction => callIt(url, query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
 					then(result => parseTree(result.store.terminal.intervalEventTree.list, fraction))))
 			const parsed = Iterable.from(results).pipe(
 				flatMap(x => x),
@@ -164,12 +171,12 @@ export const createWasteIQDriver = (variant?: "SECONDARY") =>
 					}
 				  }
 				}
-			  }`)
+			  }`, version)
 
 			const fractions = ["9999", "129917"]
 
 
-			const results = await Promise.all(fractions.map(fraction => callIt(urlToUse, query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
+			const results = await Promise.all(fractions.map(fraction => callIt(url, query, {...args, fractionFilter: {key: "fraction", value: fraction}}, rootValue).
 					then(result => parseOperatorTree(result.store.terminal.intervalEventTree.list, fraction))))
 			const parsed = Iterable.from(results).pipe(
 				flatMap(x => x),
